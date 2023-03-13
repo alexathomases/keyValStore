@@ -124,10 +124,24 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    register<bit<32>>(NUM_PORTS) byte_ct_reg;
-
     action drop() {
         mark_to_drop(standard_metadata);
+    }
+
+    action get() {
+
+    }
+
+    action put() {
+
+    }
+
+    action range() {
+
+    }
+
+    action select() {
+
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
@@ -137,129 +151,25 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    table ipv4_lpm {
+    table kvs {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.request.reqType: exact;
         }
         actions = {
-            ipv4_forward;
+            get;
+            put;
+            range;
+            select;
             drop;
             NoAction;
         }
         size = 1024;
         default_action = drop();
-    }
-
-    action forward_probe(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action update_probe() {
-        byte_ct_reg.read(hdr.probe.byte_ct_2, 2);
-        byte_ct_reg.read(hdr.probe.byte_ct_3, 3);
-
-        byte_ct_reg.write(2, 0);
-        byte_ct_reg.write(3, 0);
-
-        hdr.probe.switch_id = 1;
-    }
-
-    table probe {
-        key = {
-            hdr.ethernet.etherType: exact;
-        }
-        actions = {
-            forward_probe;
-            drop;
-            NoAction;
-        }
-        size = 1024;
-        default_action = drop();
-    }
-
-    action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        hash(meta.ecmp_select,
-            HashAlgorithm.crc16,
-            ecmp_base,
-            { hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr,
-              hdr.ipv4.protocol,
-              hdr.tcp.srcPort,
-              hdr.tcp.dstPort },
-            ecmp_count);
-    }
-    action set_packet_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        hash(meta.ecmp_select,
-            HashAlgorithm.crc16,
-            ecmp_base,
-            { standard_metadata.ingress_global_timestamp },
-            ecmp_count);
-    }
-    table packet_group {
-        key = {
-            hdr.ipv4.dstAddr: lpm;
-        }
-        actions = {
-            drop;
-            set_packet_select;
-        }
-        size = 1024;
-    }
-    action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
-        hdr.ethernet.dstAddr = nhop_dmac;
-        hdr.ipv4.dstAddr = nhop_ipv4;
-        hdr.ethernet.etherType = TYPE_IPV4;
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-    table ecmp_group {
-        key = {
-            hdr.ipv4.dstAddr: lpm;
-        }
-        actions = {
-            drop;
-            set_ecmp_select;
-        }
-        size = 1024;
-    }
-    table ecmp_nhop {
-        key = {
-            meta.ecmp_select: exact;
-        }
-        actions = {
-            drop;
-            set_nhop;
-        }
-        size = 2;
     }
 
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-            if (hdr.first.isValid()) {
-                if (hdr.first.per_packet == 0) {
-                    ecmp_group.apply();
-                } else {
-                    packet_group.apply();
-                }
-                ecmp_nhop.apply();
-
-                bit<32> byte_cnt;
-
-                byte_ct_reg.read(byte_cnt, (bit<32>)standard_metadata.egress_spec);
-                byte_cnt = byte_cnt + (bit<32>)standard_metadata.packet_length;
-
-                byte_ct_reg.write((bit<32>)standard_metadata.egress_spec, byte_cnt);
-            } else if (hdr.probe.isValid()) {
-                probe.apply();
-                if (hdr.probe.switch_id == 0) {
-                    update_probe();
-                }
-            } else {
-                ipv4_lpm.apply();
-            }
+            kvs.apply();
         }
     }
 }

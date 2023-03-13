@@ -25,11 +25,25 @@ def get_if():
         exit(1)
     return iface
 
+def handle_pkt(pkt):
+    print("got a packet")
+    if Ether in pkt:
+        pkt.show2()
+    #    hexdump(pkt)
+        sys.stdout.flush()
+
 def main():
 
     if len(sys.argv)<4:
-        print('pass 2 arguments: <destination> "<message>" <o/n/p>')
+        print('pass 2 arguments: <destination> "<message>" <g/p/r/s>')
         exit(1)
+
+    ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
+    iface_receive = ifaces[0]
+    print("sniffing on %s" % iface_receive)
+    sys.stdout.flush()
+    sniff(iface = iface_receive,
+          prn = lambda x: handle_pkt(x))
 
     addr = socket.gethostbyname(sys.argv[1])
     iface = get_if()
@@ -37,34 +51,35 @@ def main():
     print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
 
-    # Send a normal packet, per-flow load balancing
-    if sys.argv[3] == "f":
-        for size in [10, 106, 200]:
-            payload = '\0x00' * size
-            for _ in range(100):
-                tcp_sport = random.randint(49152,65535)
-                tcp_dport = random.randint(1000, 2000)
-                pkt2 = pkt / First() / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
-                sendp(pkt2, iface=iface, verbose=False)
+    # GET request
+    if sys.argv[3] == "g":
+        tcp_sport = random.randint(49152,65535)
+        tcp_dport = random.randint(1000, 2000)
+        pkt2 = pkt / Request(reqType=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
+        sendp(pkt2, iface=iface, verbose=False)
 
-    # Send a normal packet, per-packet load balancing
-    elif sys.argv[3] == "o":
-        #for size in [10, 106, 200]:
-        for size in [10]:
-            payload = '\0x00' * size
-            pkts = []
-            for i in range(100):
-                tcp_sport = random.randint(49152,65535)
-                tcp_dport = random.randint(1000, 2000)
-                pkt2 = pkt / First(per_packet=1) / IP(dst=addr, id=i) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
-                pkts.append(pkt2)
-            sendp(pkts, iface=iface, verbose=False)
-
-    # Send a probe/query packet
+    # PUT request
     elif sys.argv[3] == "p":
-        pkt = pkt / Probe() / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
-        pkt.show2()
-        sendp(pkt, iface=iface, verbose=False)
+        tcp_sport = random.randint(49152,65535)
+        tcp_dport = random.randint(1000, 2000)
+        pkt2 = pkt / Request(reqType=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
+        sendp(pkt2, iface=iface, verbose=False)
+
+    # RANGE request
+    elif sys.argv[3] == "r":
+        # TODO split if necessary
+        tcp_sport = random.randint(49152,65535)
+        tcp_dport = random.randint(1000, 2000)
+        pkt2 = pkt / Request(reqType=2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
+        sendp(pkt2, iface=iface, verbose=False)
+
+    # SELECT request
+    elif sys.argv[3] == "s":
+        # TODO split if necessary
+        tcp_sport = random.randint(49152,65535)
+        tcp_dport = random.randint(1000, 2000)
+        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport) / payload
+        sendp(pkt2, iface=iface, verbose=False)
 
 
 if __name__ == '__main__':

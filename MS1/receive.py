@@ -26,16 +26,10 @@ def get_if():
         exit(1)
     return iface
 
-def handle_pkt(pkt, file):
+def handle_pkt(pkt):
+    print("got a packet")
     if Ether in pkt:
-        #print("got a packet")
-        if pkt[Ether].type == 2048: # IP packet
-            file.write(str(pkt[IP].id)+'\n')
-        elif pkt[Ether].type == 2050: # Query packet
-            print("PROBE PACKET")
-            pkt.show2()
-            print("Bytes on upper path:", pkt[Probe].byte_ct_2);
-            print("Bytes on lower path:", pkt[Probe].byte_ct_3);
+        pkt.show2()
     #    hexdump(pkt)
         sys.stdout.flush()
 
@@ -45,10 +39,8 @@ def main():
     iface = ifaces[0]
     print("sniffing on %s" % iface)
     sys.stdout.flush()
-    output=open("m2t3.txt","w")
     sniff(iface = iface,
-          prn = lambda x: handle_pkt(x, output))
-    output.close()
+          prn = lambda x: handle_pkt(x))
 
 if __name__ == '__main__':
     main()
