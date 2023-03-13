@@ -5,22 +5,13 @@ import sys
 
 from scapy.all import *
 
-class First(Packet):
-    name = "first"
-    fields_desc=[BitField("prot", 0, 8),
-                BitField("per_packet", 0, 8)]
+class Request(Packet):
+    name = "request"
+    fields_desc=[BitField("bool", 0, 2),
+                 BitField("reqType", 0, 2)]
 
-bind_layers(Ether, First, type = 0x0801)
-bind_layers(First, IP, prot = 0x0)
-
-class Probe(Packet):
-    name = "probe"
-    fields_desc=[BitField("byte_ct_2", 0, 32),
-                 BitField("byte_ct_3", 0, 32),
-                 BitField("switch_id", 0, 32)]
-
-bind_layers(Ether, Probe, type = 0x0802)
-bind_layers(Probe, IP, switch_id = 0)
+bind_layers(Ether, Request, type = 0x0801)
+bind_layers(Request, IP, bool = 0)
 
 def get_if():
     ifs=get_if_list()

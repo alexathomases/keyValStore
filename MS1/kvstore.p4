@@ -2,11 +2,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-#define NUM_PORTS 4
-
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<16> TYPE_FIRST = 0x801;
-const bit<16> TYPE_PROBE = 0x802;
+const bit<16> TYPE_REQ = 0x801;
+const bit<2> TYPE_GET = 0b00;
+const bit<2> TYPE_PUT = 0b01;
+const bit<2> TYPE_RANGE = 0b10;
+const bit<2> TYPE_SELECT = 0b11;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -51,15 +52,9 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-header first_t {
-    bit<8> prot;
-    bit<8> per_packet;
-}
-
-header probe_t {
-    bit<32> byte_ct_2;
-    bit<32> byte_ct_3;
-    bit<32> switch_id;
+header request_t {
+    bit<2> bool;
+    bit<2> reqType;
 }
 
 struct metadata {
@@ -68,10 +63,9 @@ struct metadata {
 
 struct headers {
     ethernet_t   ethernet;
-    first_t      first;
+    request_t    request;
     ipv4_t       ipv4;
     tcp_t        tcp;
-    probe_t      probe;
 }
 
 /*************************************************************************
@@ -91,19 +85,13 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
-            TYPE_FIRST: parse_first;
-            TYPE_PROBE: parse_probe;
+            TYPE_REQ: parse_req;
             default: accept;
         }
     }
 
-    state parse_first {
-        packet.extract(hdr.first);
-        transition parse_ipv4;
-    }
-
-    state parse_probe {
-        packet.extract(hdr.probe);
+    state parse_req {
+        packet.extract(hdr.request);
         transition parse_ipv4;
     }
 
