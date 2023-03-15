@@ -1,0 +1,63 @@
+{
+  "target": "bmv2",
+  "p4info": "build/kvstore.p4.p4info.txt",
+  "bmv2_json": "build/kvstore.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 0
+      },
+      "action_name": "MyIngress.get",
+      "action_params": {
+        "dstAddr": "08:00:00:00:02:22",
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 1
+      },
+      "action_name": "MyIngress.put",
+      "action_params": {
+        "dstAddr": "08:00:00:00:02:22",
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 2
+      },
+      "action_name": "MyIngress.range",
+      "action_params": {
+        "dstAddr": "08:00:00:00:02:22",
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 3
+      },
+      "action_name": "MyIngress.selectReq",
+      "action_params": {
+        "dstAddr": "08:00:00:00:02:22",
+        "port": 2
+      }
+    }
+  ]
+}
