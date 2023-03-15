@@ -4,12 +4,6 @@
   "bmv2_json": "build/kvstore.json",
   "table_entries": [
     {
-      "table": "MyIngress.ipv4_lpm",
-      "default_action": true,
-      "action_name": "MyIngress.drop",
-      "action_params": { }
-    },
-    {
       "table": "MyIngress.kvs",
       "default_action": true,
       "action_name": "MyIngress.drop",
@@ -22,7 +16,6 @@
       },
       "action_name": "MyIngress.get",
       "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
         "port": 2
       }
     },
@@ -33,7 +26,6 @@
       },
       "action_name": "MyIngress.put",
       "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
         "port": 2
       }
     },
@@ -42,9 +34,8 @@
       "match": {
         "hdr.request.reqType": 2
       },
-      "action_name": "MyIngress.range",
+      "action_name": "MyIngress.rangeReq",
       "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
         "port": 2
       }
     },
@@ -55,7 +46,6 @@
       },
       "action_name": "MyIngress.selectReq",
       "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
         "port": 2
       }
     }

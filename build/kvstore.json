@@ -44,8 +44,12 @@
       "name" : "request_t",
       "id" : 3,
       "fields" : [
-        ["exists", 6, false],
-        ["reqType", 2, false]
+        ["exists", 3, false],
+        ["reqType", 2, false],
+        ["key1", 32, false],
+        ["key2", 32, false],
+        ["val", 32, false],
+        ["op", 3, false]
       ]
     },
     {
@@ -81,6 +85,13 @@
         ["window", 16, false],
         ["checksum", 16, false],
         ["urgentPtr", 16, false]
+      ]
+    },
+    {
+      "name" : "response_t",
+      "id" : 6,
+      "fields" : [
+        ["ret_val", 32, false]
       ]
     }
   ],
@@ -124,6 +135,13 @@
       "name" : "tcp",
       "id" : 5,
       "header_type" : "tcp_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "response",
+      "id" : 6,
+      "header_type" : "response_t",
       "metadata" : false,
       "pi_omit" : true
     }
@@ -257,11 +275,11 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 223,
+        "line" : 230,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
-      "order" : ["ethernet", "request", "ipv4", "tcp"],
+      "order" : ["ethernet", "request", "ipv4", "tcp", "response"],
       "primitives" : []
     }
   ],
@@ -287,7 +305,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 201,
+        "line" : 208,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -363,7 +381,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 134,
+            "line" : 141,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -375,11 +393,34 @@
       "id" : 2,
       "runtime_data" : [
         {
-          "name" : "k",
-          "bitwidth" : 32
+          "name" : "port",
+          "bitwidth" : 9
         }
       ],
       "primitives" : [
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["response", "ret_val"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "kvstore"
+            },
+            {
+              "type" : "field",
+              "value" : ["request", "key1"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "kvstore.p4",
+            "line" : 145,
+            "column" : 8,
+            "source_fragment" : "kvstore.read(hdr.response.ret_val, hdr.request.key1)"
+          }
+        },
         {
           "op" : "assign",
           "parameters" : [
@@ -388,15 +429,15 @@
               "value" : ["standard_metadata", "egress_spec"]
             },
             {
-              "type" : "hexstr",
-              "value" : "0x0002"
+              "type" : "runtime_data",
+              "value" : 0
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 139,
+            "line" : 146,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = 2"
+            "source_fragment" : "standard_metadata.egress_spec = port"
           }
         }
       ]
@@ -406,12 +447,8 @@
       "id" : 3,
       "runtime_data" : [
         {
-          "name" : "k",
-          "bitwidth" : 32
-        },
-        {
-          "name" : "val",
-          "bitwidth" : 32
+          "name" : "port",
+          "bitwidth" : 9
         }
       ],
       "primitives" : [
@@ -423,19 +460,19 @@
               "value" : "kvstore"
             },
             {
-              "type" : "runtime_data",
-              "value" : 0
+              "type" : "field",
+              "value" : ["request", "key1"]
             },
             {
-              "type" : "runtime_data",
-              "value" : 1
+              "type" : "field",
+              "value" : ["request", "val"]
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 143,
+            "line" : 150,
             "column" : 8,
-            "source_fragment" : "kvstore.write(k, val)"
+            "source_fragment" : "kvstore.write(hdr.request.key1, hdr.request.val)"
           }
         },
         {
@@ -446,15 +483,15 @@
               "value" : ["standard_metadata", "egress_spec"]
             },
             {
-              "type" : "hexstr",
-              "value" : "0x0002"
+              "type" : "runtime_data",
+              "value" : 0
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 144,
+            "line" : 151,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = 2"
+            "source_fragment" : "standard_metadata.egress_spec = port"
           }
         }
       ]
@@ -462,14 +499,64 @@
     {
       "name" : "MyIngress.rangeReq",
       "id" : 4,
-      "runtime_data" : [],
-      "primitives" : []
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "kvstore.p4",
+            "line" : 155,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = port"
+          }
+        }
+      ]
     },
     {
       "name" : "MyIngress.selectReq",
       "id" : 5,
-      "runtime_data" : [],
-      "primitives" : []
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "kvstore.p4",
+            "line" : 159,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = port"
+          }
+        }
+      ]
     }
   ],
   "pipelines" : [
@@ -478,7 +565,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 127,
+        "line" : 136,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -489,7 +576,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 162,
+            "line" : 169,
             "column" : 10,
             "source_fragment" : "kvs"
           },
@@ -533,7 +620,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 179,
+            "line" : 186,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.ipv4.ttl > 0"
           },
@@ -578,7 +665,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 189,
+        "line" : 196,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -594,7 +681,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 201,
+        "line" : 208,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },

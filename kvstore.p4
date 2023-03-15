@@ -57,8 +57,16 @@ header tcp_t {
 }
 
 header request_t {
-    bit<6> exists;
+    bit<3> exists;
     bit<2> reqType;
+    bit<32> key1;
+    bit<32> key2;
+    bit<32> val;
+    bit<3> op;
+}
+
+header response_t {
+    bit<32> ret_val;
 }
 
 struct metadata {
@@ -70,6 +78,7 @@ struct headers {
     request_t    request;
     ipv4_t       ipv4;
     tcp_t        tcp;
+    response_t   response;
 }
 
 /*************************************************************************
@@ -128,28 +137,26 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    bit<32> ret_val;
-
     action drop() {
         mark_to_drop(standard_metadata);
     }
 
-    action get(bit<32> k) {
-        kvstore.read(ret_val, k);
-        standard_metadata.egress_spec = 2;
+    action get(egressSpec_t port) {
+        kvstore.read(hdr.response.ret_val, hdr.request.key1);
+        standard_metadata.egress_spec = port;
     }
 
-    action put(bit<32> k, bit<32> val) {
-        kvstore.write(k, val);
-        standard_metadata.egress_spec = 2;
+    action put(egressSpec_t port) {
+        kvstore.write(hdr.request.key1, hdr.request.val);
+        standard_metadata.egress_spec = port;
     }
 
-    action rangeReq() {
-
+    action rangeReq(egressSpec_t port) {
+        standard_metadata.egress_spec = port;
     }
 
-    action selectReq() {
-
+    action selectReq(egressSpec_t port) {
+        standard_metadata.egress_spec = port;
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
@@ -226,7 +233,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.request);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
-
+        packet.emit(hdr.response);
     }
 }
 
