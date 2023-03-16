@@ -7,12 +7,12 @@ from scapy.all import *
 
 class Request(Packet):
     name = "request"
-    fields_desc=[BitField("exists", 0, 3),
-                 BitField("reqType", 0, 2),
-                 BitField("key1", 0, 32),
-                 BitField("key2", 0, 32),
-                 BitField("val", 0, 32),
-                 BitField("op", 0, 3)]
+    fields_desc=[BitField("exists", 0, 8),
+                 BitField("reqType", 0, 8),
+                 IntField("key1", 0),
+                 IntField("key2", 0),
+                 IntField("val", 0),
+                 BitField("op", 0, 8)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
@@ -42,12 +42,12 @@ def main():
         print('pass 2 arguments: <destination> <g/p/r/s> "<message>" ')
         exit(1)
 
-    ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
-    iface_receive = ifaces[0]
-    print("sniffing on %s" % iface_receive)
-    sys.stdout.flush()
-    sniff(iface = iface_receive,
-          prn = lambda x: handle_pkt(x))
+    # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
+    # iface_receive = ifaces[0]
+    # print("sniffing on %s" % iface_receive)
+    # sys.stdout.flush()
+    # sniff(iface = iface_receive,
+    #       prn = lambda x: handle_pkt(x))
 
     addr = socket.gethostbyname(sys.argv[1])
     iface = get_if()
@@ -67,7 +67,10 @@ def main():
     elif sys.argv[2] == "p":
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        pkt2 = pkt / Request(reqType=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        kv_list = sys.argv[3].split()
+        k1 = int(kv_list[0])
+        v = int(kv_list[1])
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
         sendp(pkt2, iface=iface, verbose=False)
 
     # RANGE request

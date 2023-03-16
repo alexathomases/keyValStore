@@ -5,14 +5,23 @@ import sys
 from scapy.all import *
 from scapy.layers.inet import _IPOption_HDR
 
-class Probe(Packet):
-    name = "probe"
-    fields_desc=[BitField("byte_ct_2", 0, 32),
-                 BitField("byte_ct_3", 0, 32),
-                 BitField("switch_id", 0, 32)]
+class Request(Packet):
+    name = "request"
+    fields_desc=[BitField("exists", 0, 8),
+                 BitField("reqType", 0, 8),
+                 IntField("key1", 0),
+                 IntField("key2", 0),
+                 IntField("val", 0),
+                 BitField("op", 0, 8)]
 
-bind_layers(Ether, Probe, type = 0x0802)
-bind_layers(Probe, IP, switch_id = 1)
+bind_layers(Ether, Request, type = 0x0801)
+bind_layers(Request, IP, exists = 1)
+
+class Response(Packet):
+    name = "response"
+    fields_desc=[IntField("return_val", 0)]
+
+bind_layers(TCP, Response, urgentPtr = 1)
 
 def get_if():
     ifs=get_if_list()

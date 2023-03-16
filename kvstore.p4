@@ -57,12 +57,12 @@ header tcp_t {
 }
 
 header request_t {
-    bit<3> exists;
-    bit<2> reqType;
+    bit<8> exists;
+    bit<8> reqType;
     bit<32> key1;
     bit<32> key2;
     bit<32> val;
-    bit<3> op;
+    bit<8> op;
 }
 
 header response_t {
@@ -144,19 +144,23 @@ control MyIngress(inout headers hdr,
     action get(egressSpec_t port) {
         kvstore.read(hdr.response.ret_val, hdr.request.key1);
         standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action put(egressSpec_t port) {
         kvstore.write(hdr.request.key1, hdr.request.val);
         standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action rangeReq(egressSpec_t port) {
         standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action selectReq(egressSpec_t port) {
         standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
