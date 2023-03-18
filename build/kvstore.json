@@ -44,12 +44,12 @@
       "name" : "request_t",
       "id" : 3,
       "fields" : [
-        ["exists", 3, false],
-        ["reqType", 2, false],
+        ["exists", 8, false],
+        ["reqType", 8, false],
         ["key1", 32, false],
         ["key2", 32, false],
         ["val", 32, false],
-        ["op", 3, false]
+        ["op", 8, false]
       ]
     },
     {

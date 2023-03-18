@@ -21,7 +21,7 @@ class Response(Packet):
     name = "response"
     fields_desc=[IntField("return_val", 0)]
 
-bind_layers(TCP, Response, urgentPtr = 1)
+bind_layers(TCP, Response, urgentPtr = 0)
 
 def get_if():
     ifs=get_if_list()
