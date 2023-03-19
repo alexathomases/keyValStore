@@ -17,6 +17,12 @@ class Request(Packet):
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
 
+# class Response(Packet):
+#     name = "response"
+#     fields_desc=[IntField("return_val", 0)]
+#
+# bind_layers(TCP, Response, urgentPtr = 1)
+
 def get_if():
     ifs=get_if_list()
     iface=None # "h1-eth0"
@@ -59,8 +65,13 @@ def main():
     if sys.argv[2] == "g":
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
+        kv_list = sys.argv[3].split()
+        if len(kv_list) != 1:
+            print('GET requires 1 key')
+            exit(1)
         k = int(sys.argv[3])
         pkt2 = pkt / Request(reqType=0, key1=k) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
     # PUT request
@@ -68,9 +79,13 @@ def main():
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
         kv_list = sys.argv[3].split()
+        if len(kv_list) != 2:
+            print('PUT requires 1 key and 1 value')
+            exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
         pkt2 = pkt / Request(reqType=1, key1=k1, val=v) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
     # RANGE request

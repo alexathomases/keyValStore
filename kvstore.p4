@@ -144,27 +144,27 @@ control MyIngress(inout headers hdr,
     action get(egressSpec_t port) {
         kvstore.read(hdr.response.ret_val, hdr.request.key1);
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
     }
 
     action put(egressSpec_t port) {
         kvstore.write(hdr.request.key1, hdr.request.val);
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        standard_metadata.egress_spec = 2;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 9;
     }
 
     action rangeReq(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = 2;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action selectReq(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = 2;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = 2;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -235,9 +235,9 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.request);
+        packet.emit(hdr.response);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
-        packet.emit(hdr.response);
     }
 }
 

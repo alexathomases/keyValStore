@@ -14,14 +14,14 @@ class Request(Packet):
                  IntField("val", 0),
                  BitField("op", 0, 8)]
 
-bind_layers(Ether, Request, type = 0x0801)
-bind_layers(Request, IP, exists = 1)
-
 class Response(Packet):
     name = "response"
     fields_desc=[IntField("return_val", 0)]
 
-bind_layers(TCP, Response, urgentPtr = 0)
+bind_layers(Ether, Request, type = 0x0801)
+bind_layers(Request, IP, exists = 1)
+
+bind_layers(TCP, Response, urgptr = 1)
 
 def get_if():
     ifs=get_if_list()
@@ -37,7 +37,7 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
-    if Ether in pkt:
+    if Request in pkt or Response in pkt:
         pkt.show2()
     #    hexdump(pkt)
         sys.stdout.flush()
