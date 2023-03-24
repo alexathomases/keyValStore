@@ -69,8 +69,12 @@ header response_t {
     bit<32> ret_val;
 }
 
+struct resubmit_meta_t {
+   bit<8> i;
+}
+
 struct metadata {
-    bit<14> ecmp_select;
+    resubmit_meta_t resubmit_meta;
 }
 
 struct headers {
