@@ -69,8 +69,12 @@ header response_t {
     bit<32> ret_val;
 }
 
+struct resubmit_meta_t {
+   bit<8> i;
+}
+
 struct metadata {
-    bit<14> ecmp_select;
+    resubmit_meta_t resubmit_meta;
 }
 
 struct headers {
@@ -115,9 +119,16 @@ parser MyParser(packet_in packet,
 
     state parse_tcp {
         packet.extract(hdr.tcp);
-        transition accept;
+          transition select(hdr.tcp.urgentPtr) {
+            1: parse_response;
+            default: accept;
+        }
     }
 
+    state parse_response {
+        packet.extract(hdr.response);
+        transition accept;
+    }
 }
 
 /*************************************************************************
@@ -137,6 +148,7 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -149,22 +161,22 @@ control MyIngress(inout headers hdr,
 
     action put(egressSpec_t port) {
         kvstore.write(hdr.request.key1, hdr.request.val);
-        standard_metadata.egress_spec = 2;
+        standard_metadata.egress_spec = 1;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 9;
     }
 
     action rangeReq(egressSpec_t port) {
-        standard_metadata.egress_spec = 2;
+        standard_metadata.egress_spec = 1;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action selectReq(egressSpec_t port) {
-        standard_metadata.egress_spec = 2;
+        standard_metadata.egress_spec = 1;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = 2;
+        standard_metadata.egress_spec = 1;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -235,9 +247,9 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.request);
-        packet.emit(hdr.response);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
+        packet.emit(hdr.response);
     }
 }
 

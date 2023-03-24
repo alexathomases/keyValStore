@@ -1,0 +1,115 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 35207968
+    name: "MyIngress.kvs"
+    alias: "kvs"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.request.reqType"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25395738
+  }
+  action_refs {
+    id: 32427501
+  }
+  action_refs {
+    id: 32995157
+  }
+  action_refs {
+    id: 25790744
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25652968
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 25395738
+    name: "MyIngress.get"
+    alias: "get"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 32427501
+    name: "MyIngress.put"
+    alias: "put"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 32995157
+    name: "MyIngress.rangeReq"
+    alias: "rangeReq"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 25790744
+    name: "MyIngress.selectReq"
+    alias: "selectReq"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+registers {
+  preamble {
+    id: 372319427
+    name: "kvstore"
+    alias: "kvstore"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1024
+}
+type_info {
+}

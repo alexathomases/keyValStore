@@ -16,7 +16,7 @@ class Request(Packet):
 
 class Response(Packet):
     name = "response"
-    fields_desc=[IntField("return_val", 0)]
+    fields_desc=[IntField("ret_val", 0)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
