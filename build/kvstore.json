@@ -257,6 +257,41 @@
           ],
           "transitions" : [
             {
+              "type" : "hexstr",
+              "value" : "0x0001",
+              "mask" : null,
+              "next_state" : "parse_response"
+            },
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["tcp", "urgentPtr"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_response",
+          "id" : 3,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "response"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
               "type" : "default",
               "value" : null,
               "mask" : null,
@@ -275,11 +310,11 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 234,
+        "line" : 242,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
-      "order" : ["ethernet", "request", "response", "ipv4", "tcp"],
+      "order" : ["ethernet", "request", "ipv4", "tcp", "response"],
       "primitives" : []
     }
   ],
@@ -305,7 +340,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 212,
+        "line" : 220,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -381,7 +416,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 141,
+            "line" : 149,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -416,7 +451,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 145,
+            "line" : 153,
             "column" : 8,
             "source_fragment" : "kvstore.read(hdr.response.ret_val, hdr.request.key1)"
           }
@@ -435,7 +470,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 146,
+            "line" : 154,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -477,7 +512,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 147,
+            "line" : 155,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 10"
           }
@@ -512,7 +547,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 151,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "kvstore.write(hdr.request.key1, hdr.request.val)"
           }
@@ -526,14 +561,14 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x0002"
+              "value" : "0x0001"
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 152,
+            "line" : 160,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = 2"
+            "source_fragment" : "standard_metadata.egress_spec = 1"
           }
         },
         {
@@ -573,7 +608,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 153,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 9"
           }
@@ -599,14 +634,14 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x0002"
+              "value" : "0x0001"
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 157,
+            "line" : 165,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = 2"
+            "source_fragment" : "standard_metadata.egress_spec = 1"
           }
         },
         {
@@ -646,7 +681,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 158,
+            "line" : 166,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -672,14 +707,14 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x0002"
+              "value" : "0x0001"
             }
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 162,
+            "line" : 170,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = 2"
+            "source_fragment" : "standard_metadata.egress_spec = 1"
           }
         },
         {
@@ -719,7 +754,7 @@
           ],
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 163,
+            "line" : 171,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -733,7 +768,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 136,
+        "line" : 143,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -744,7 +779,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 173,
+            "line" : 181,
             "column" : 10,
             "source_fragment" : "kvs"
           },
@@ -788,7 +823,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "kvstore.p4",
-            "line" : 190,
+            "line" : 198,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.ipv4.ttl > 0"
           },
@@ -833,7 +868,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 200,
+        "line" : 208,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -849,7 +884,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "kvstore.p4",
-        "line" : 212,
+        "line" : 220,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },

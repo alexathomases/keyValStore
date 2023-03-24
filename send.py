@@ -17,11 +17,11 @@ class Request(Packet):
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
 
-# class Response(Packet):
-#     name = "response"
-#     fields_desc=[IntField("return_val", 0)]
-#
-# bind_layers(TCP, Response, urgentPtr = 1)
+class Response(Packet):
+    name = "response"
+    fields_desc=[IntField("ret_val", 0)]
+
+bind_layers(TCP, Response, urgptr = 1)
 
 def get_if():
     ifs=get_if_list()
@@ -70,7 +70,7 @@ def main():
             print('GET requires 1 key')
             exit(1)
         k = int(sys.argv[3])
-        pkt2 = pkt / Request(reqType=0, key1=k) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        pkt2 = pkt / Request(reqType=0, key1=k) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -84,7 +84,7 @@ def main():
             exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -93,7 +93,7 @@ def main():
         # TODO split if necessary
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        pkt2 = pkt / Request(reqType=2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        pkt2 = pkt / Request(reqType=2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
@@ -101,7 +101,7 @@ def main():
         # TODO split if necessary
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport)
+        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
 
