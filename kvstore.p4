@@ -75,14 +75,15 @@ struct resubmit_meta_t {
 
 struct metadata {
     resubmit_meta_t resubmit_meta;
+    bit<32> nextInd;
 }
 
 struct headers {
-    ethernet_t   ethernet;
-    request_t    request;
-    ipv4_t       ipv4;
-    tcp_t        tcp;
-    response_t   response;
+    ethernet_t      ethernet;
+    request_t       request;
+    ipv4_t          ipv4;
+    tcp_t           tcp;
+    response_t[1]   response;
 }
 
 /*************************************************************************
@@ -126,7 +127,7 @@ parser MyParser(packet_in packet,
     }
 
     state parse_response {
-        packet.extract(hdr.response);
+        packet.extract(hdr.response.next);
         transition accept;
     }
 }
@@ -154,7 +155,7 @@ control MyIngress(inout headers hdr,
     }
 
     action get(egressSpec_t port) {
-        kvstore.read(hdr.response.ret_val, hdr.request.key1);
+        kvstore.read(hdr.response[0].ret_val, hdr.request.key1);
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
     }
@@ -212,7 +213,26 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+
+       action add_response() {
+           hdr.response.push_front(1);
+           hdr.response[0].setValid();
+           hdr.response[0].ret_val = 0;
+       }
+
+       table extend {
+           actions = {
+               add_response;
+               NoAction;
+           }
+           default_action = NoAction();
+       }
+
+       apply {
+           if (hdr.ipv4.isValid() && hdr.request.reqType > 1 && meta.nextInd != 0) {
+               extend.apply();
+           }
+       }
 }
 
 /*************************************************************************
