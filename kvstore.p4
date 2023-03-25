@@ -70,8 +70,12 @@ header response_t {
     bit<8> keepGoing;
 }
 
+struct recirculate_metadata_t {
+   bit<32> i;
+}
+
 struct metadata {
-    bit<32> nextInd;
+    recirculate_metadata_t nextInd;
     bit<32> remaining;
 }
 
@@ -107,7 +111,7 @@ parser MyParser(packet_in packet,
 
     state parse_req {
         packet.extract(hdr.request);
-        meta.nextInd = hdr.request.key1;
+        meta.nextInd.i = hdr.request.key1;
         transition parse_ipv4;
     }
 
@@ -126,7 +130,7 @@ parser MyParser(packet_in packet,
 
     state parse_response {
         packet.extract(hdr.response.next);
-        transition select(hdr.response.keepGoing) {
+        transition select(hdr.response.last.keepGoing) {
             0: accept;
             default: parse_response;
         }
@@ -204,6 +208,7 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
             kvs.apply();
         }
+
     }
 }
 
@@ -219,27 +224,22 @@ control MyEgress(inout headers hdr,
            hdr.response.push_front(1);
            hdr.response[0].setValid();
            hdr.response[0].ret_val = 0;
-           meta.nextInd = meta.nextInd + 1;
-           if (meta.nextInd == hdr.request.key2) {
-              hdr.response.keepGoing = 0;
+           meta.nextInd.i = meta.nextInd.i + 1;
+           if (meta.nextInd.i == hdr.request.key2) {
+              hdr.response[0].keepGoing = 0;
            }
-           recirculate(meta.nextInd);
        }
-
-       table extend {
-           actions = {
-               add_response;
-               NoAction;
-           }
-           default_action = NoAction();
+       action recirculate_packet() {
+          recirculate(meta.nextInd);
        }
 
        apply {
            if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
-               extend.apply();
+               add_response();
+               recirculate_packet();
            }
        }
-}
+ }
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************

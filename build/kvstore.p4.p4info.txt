@@ -96,6 +96,13 @@ actions {
     bitwidth: 9
   }
 }
+actions {
+  preamble {
+    id: 17400306
+    name: "MyEgress.recirculate_packet"
+    alias: "recirculate_packet"
+  }
+}
 registers {
   preamble {
     id: 372319427
