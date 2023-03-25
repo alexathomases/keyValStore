@@ -67,15 +67,12 @@ header request_t {
 
 header response_t {
     bit<32> ret_val;
-}
-
-struct resubmit_meta_t {
-   bit<8> i;
+    bit<8> keepGoing;
 }
 
 struct metadata {
-    resubmit_meta_t resubmit_meta;
     bit<32> nextInd;
+    bit<32> remaining;
 }
 
 struct headers {
@@ -110,6 +107,7 @@ parser MyParser(packet_in packet,
 
     state parse_req {
         packet.extract(hdr.request);
+        meta.nextInd = hdr.request.key1;
         transition parse_ipv4;
     }
 
@@ -128,7 +126,10 @@ parser MyParser(packet_in packet,
 
     state parse_response {
         packet.extract(hdr.response.next);
-        transition accept;
+        transition select(hdr.response.keepGoing) {
+            0: accept;
+            default: parse_response;
+        }
     }
 }
 
@@ -157,27 +158,27 @@ control MyIngress(inout headers hdr,
     action get(egressSpec_t port) {
         kvstore.read(hdr.response[0].ret_val, hdr.request.key1);
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action put(egressSpec_t port) {
         kvstore.write(hdr.request.key1, hdr.request.val);
-        standard_metadata.egress_spec = 1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 9;
+        standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action rangeReq(egressSpec_t port) {
-        standard_metadata.egress_spec = 1;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action selectReq(egressSpec_t port) {
-        standard_metadata.egress_spec = 1;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = 1;
+        standard_metadata.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -218,6 +219,11 @@ control MyEgress(inout headers hdr,
            hdr.response.push_front(1);
            hdr.response[0].setValid();
            hdr.response[0].ret_val = 0;
+           meta.nextInd = meta.nextInd + 1;
+           if (meta.nextInd == hdr.request.key2) {
+              hdr.response.keepGoing = 0;
+           }
+           recirculate(meta.nextInd);
        }
 
        table extend {
@@ -229,7 +235,7 @@ control MyEgress(inout headers hdr,
        }
 
        apply {
-           if (hdr.ipv4.isValid() && hdr.request.reqType > 1 && meta.nextInd != 0) {
+           if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
                extend.apply();
            }
        }

@@ -19,7 +19,8 @@ bind_layers(Request, IP, exists = 1)
 
 class Response(Packet):
     name = "response"
-    fields_desc=[IntField("ret_val", 0)]
+    fields_desc=[IntField("ret_val", 0),
+                 BitField("same", 0, 8)]
 
 bind_layers(TCP, Response, urgptr = 1)
 
@@ -93,15 +94,30 @@ def main():
         # TODO split if necessary
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        pkt2 = pkt / Request(reqType=2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        kv_list = sys.argv[3].split()
+        if len(kv_list) != 2:
+            print('RANGE requires 2 keys')
+            exit(1)
+        k1 = int(kv_list[0])
+        k2 = int(kv_list[1])
+        if k2 < k1:
+            print('Second key must be >= first key')
+            exit(1)
+        same_bool = (k1 != k2)
+        print("same bool:", same_bool)
+        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same=same_bool)
         sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
     elif sys.argv[2] == "s":
-        # TODO split if necessary
+        # TODO split if necessary, check if same=1
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        kv_list = sys.argv[3].split()
+        if len(kv_list) != 1:
+            print('GET requires 1 key')
+            exit(1)
+        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same=1)
         sendp(pkt2, iface=iface, verbose=False)
 
 
