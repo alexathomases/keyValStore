@@ -65,6 +65,7 @@ header request_t {
     bit<32> key2;
     bit<32> val;
     bit<8> op;
+    bit<8> current;
 }
 
 header response_t {
@@ -79,7 +80,7 @@ struct recirculate_metadata_t {
 
 struct metadata {
     recirculate_metadata_t nextInd;
-    bit<32> remaining;
+    bit<8> remaining;
 }
 
 struct headers {
@@ -87,7 +88,7 @@ struct headers {
     request_t       request;
     ipv4_t          ipv4;
     tcp_t           tcp;
-    response_t[1]   response;
+    response_t[256]   response;
 }
 
 /*************************************************************************
@@ -114,7 +115,9 @@ parser MyParser(packet_in packet,
 
     state parse_req {
         packet.extract(hdr.request);
-        meta.nextInd.i = (bit<8>) hdr.request.key1;
+        meta.nextInd.i = hdr.request.current;
+        meta.remaining =  hdr.request.current;
+        hdr.request.current = hdr.request.current + 1;
         transition parse_ipv4;
     }
 
@@ -133,7 +136,8 @@ parser MyParser(packet_in packet,
 
     state parse_response {
         packet.extract(hdr.response.next);
-        transition select(hdr.response.last.keepGoing) {
+        meta.remaining = meta.remaining - 1;
+        transition select(meta.remaining) {
             0: accept;
             default: parse_response;
         }
@@ -226,17 +230,15 @@ control MyEgress(inout headers hdr,
        action add_response() {
            hdr.response.push_front(1);
            hdr.response[0].setValid();
-           hdr.response[0].ret_val = 0;
-           meta.nextInd.i = meta.nextInd.i + 1;
-           if (meta.nextInd.i == (bit<8>) hdr.request.key2) {
-              hdr.response[0].keepGoing = 0;
-           }
+           kvstore.read(hdr.response[0].ret_val, (bit<32>)((bit<8>) hdr.request.key1 + meta.nextInd.i));
        }
 
        apply {
-           if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
-               add_response();
-               recirculate_preserving_field_list(RECIRC_FL_1);
+           if (meta.nextInd.i <= ((bit<8>) hdr.request.key2 - (bit<8>) hdr.request.key1)) {
+             if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
+                 add_response();
+                 recirculate_preserving_field_list(RECIRC_FL_1);
+             }
            }
        }
  }

@@ -12,7 +12,8 @@ class Request(Packet):
                  IntField("key1", 0),
                  IntField("key2", 0),
                  IntField("val", 0),
-                 BitField("op", 0, 8)]
+                 BitField("op", 0, 8),
+                 BitField("current", 1, 8)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
@@ -22,7 +23,11 @@ class Response(Packet):
     fields_desc=[IntField("ret_val", 0),
                  BitField("same", 0, 8)]
 
-bind_layers(TCP, Response, urgptr = 1)
+class ResponseList(Packet):
+    name = "responseList"
+    fields_desc = [PacketListField("response", [], Response)]
+
+bind_layers(TCP, ResponseList, urgptr = 1)
 
 def get_if():
     ifs=get_if_list()
@@ -71,7 +76,7 @@ def main():
             print('GET requires 1 key')
             exit(1)
         k = int(sys.argv[3])
-        pkt2 = pkt / Request(reqType=0, key1=k) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -85,7 +90,7 @@ def main():
             exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -105,7 +110,7 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         print("same bool:", same_bool)
-        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same=same_bool)
+        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
         sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
@@ -117,7 +122,7 @@ def main():
         if len(kv_list) != 1:
             print('GET requires 1 key')
             exit(1)
-        pkt2 = pkt / Request(reqType=3) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same=1)
+        pkt2 = pkt / Request(reqType=3, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
         sendp(pkt2, iface=iface, verbose=False)
 
 
