@@ -38,7 +38,7 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
-    if Request in pkt or Response in pkt:
+    if (Request in pkt or Response in pkt) and (pkt[IP].ttl < 64):
         pkt.show2()
     #    hexdump(pkt)
         sys.stdout.flush()

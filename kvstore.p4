@@ -4,6 +4,8 @@
 
 #define NUM_KEYS 1024
 
+const bit<8> RECIRC_FL_1 = 0;
+
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_REQ = 0x801;
 const bit<2> TYPE_GET = 0b00;
@@ -71,7 +73,8 @@ header response_t {
 }
 
 struct recirculate_metadata_t {
-   bit<32> i;
+   @field_list(RECIRC_FL_1)
+   bit<8> i;
 }
 
 struct metadata {
@@ -111,7 +114,7 @@ parser MyParser(packet_in packet,
 
     state parse_req {
         packet.extract(hdr.request);
-        meta.nextInd.i = hdr.request.key1;
+        meta.nextInd.i = (bit<8>) hdr.request.key1;
         transition parse_ipv4;
     }
 
@@ -225,18 +228,15 @@ control MyEgress(inout headers hdr,
            hdr.response[0].setValid();
            hdr.response[0].ret_val = 0;
            meta.nextInd.i = meta.nextInd.i + 1;
-           if (meta.nextInd.i == hdr.request.key2) {
+           if (meta.nextInd.i == (bit<8>) hdr.request.key2) {
               hdr.response[0].keepGoing = 0;
            }
-       }
-       action recirculate_packet() {
-          recirculate(meta.nextInd);
        }
 
        apply {
            if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
                add_response();
-               recirculate_packet();
+               recirculate_preserving_field_list(RECIRC_FL_1);
            }
        }
  }
