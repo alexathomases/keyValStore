@@ -27,6 +27,7 @@ class ResponseList(Packet):
     name = "responseList"
     fields_desc = [PacketListField("response", [], Response)]
 
+bind_layers(TCP, Response, urgptr = 1)
 bind_layers(TCP, ResponseList, urgptr = 1)
 
 def get_if():
@@ -76,7 +77,7 @@ def main():
             print('GET requires 1 key')
             exit(1)
         k = int(sys.argv[3])
-        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
+        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -90,7 +91,7 @@ def main():
             exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 

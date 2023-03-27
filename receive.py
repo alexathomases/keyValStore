@@ -24,12 +24,13 @@ class Response(Packet):
 
 class ResponseList(Packet):
     name = "responseList"
-    fields_desc = [PacketListField("response", [], Response)]
+    fields_desc = [PacketListField("response", [], Response, length_from=lambda pkt:(40))]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
 
 bind_layers(TCP, ResponseList, urgptr = 1)
+bind_layers(TCP, Response, urgptr = 1)
 
 def expand(x):
     yield x
@@ -51,13 +52,16 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
-    if (Request in pkt or ResponseList in pkt) and (pkt[IP].ttl < 64):
+    # if (ResponseList in pkt) and (pkt[IP].ttl < 64):
+    #     pkt.show2()
+    #     data_layers = [l for l in expand(pkt) if l.name=='response']
+    # #    hexdump(pkt)
+    #     print(len(data_layers))
+    #     for sw in data_layers:
+    #         print("Return Value: {}".format(sw.ret_val))
+    #     sys.stdout.flush()
+    if Request in pkt and pkt[IP].ttl < 64:
         pkt.show2()
-        data_layers = [l for l in expand(pkt) if l.name=='response']
-    #    hexdump(pkt)
-        print(len(data_layers))
-        for sw in data_layers:
-            print("Return Value: {}".format(sw.ret_val))
         sys.stdout.flush()
 
 
