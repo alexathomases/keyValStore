@@ -57,13 +57,11 @@ def handle_pkt(pkt):
         # pkt.show2()
         data_layers = [l for l in expand(pkt) if l.name=='response']
     #    hexdump(pkt)
-        print(len(data_layers))
+        ret_array = []
         for sw in data_layers:
-            print("Return Value: {}".format(sw.ret_val))
-        sys.stdout.flush()
-    if Request in pkt and pkt[IP].ttl < 64:
-        #pkt.show2()
-        print("REQUEST")
+            ret_array.insert(0, sw.ret_val)
+        for ret in ret_array:
+            print("Return Value: {}".format(ret))
         sys.stdout.flush()
 
 
