@@ -30,7 +30,7 @@ bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
 
 bind_layers(TCP, Response, urgptr = 1)
-bind_layers(Response, Response)
+bind_layers(Response, Response, same = 1)
 
 def expand(x):
     yield x
@@ -62,7 +62,8 @@ def handle_pkt(pkt):
             print("Return Value: {}".format(sw.ret_val))
         sys.stdout.flush()
     if Request in pkt and pkt[IP].ttl < 64:
-        pkt.show2()
+        #pkt.show2()
+        print("REQUEST")
         sys.stdout.flush()
 
 

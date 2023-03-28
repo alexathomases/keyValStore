@@ -28,7 +28,7 @@ class Response(Packet):
 #     fields_desc = [PacketListField("response", [], Response)]
 
 bind_layers(TCP, Response, urgptr = 1)
-bind_layers(Response, Response)
+bind_layers(Response, Response, same = 1)
 
 def get_if():
     ifs=get_if_list()
@@ -111,7 +111,7 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         print("same bool:", same_bool)
-        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
+        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1) / Response(same = 1)
         sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
