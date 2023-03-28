@@ -21,14 +21,14 @@ bind_layers(Request, IP, exists = 1)
 class Response(Packet):
     name = "response"
     fields_desc=[IntField("ret_val", 0),
-                 BitField("same", 0, 8)]
+                 BitField("same", 1, 8)]
 
-class ResponseList(Packet):
-    name = "responseList"
-    fields_desc = [PacketListField("response", [], Response)]
+# class ResponseList(Packet):
+#     name = "responseList"
+#     fields_desc = [PacketListField("response", [], Response)]
 
 bind_layers(TCP, Response, urgptr = 1)
-bind_layers(TCP, ResponseList, urgptr = 1)
+bind_layers(Response, Response)
 
 def get_if():
     ifs=get_if_list()
@@ -111,7 +111,7 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         print("same bool:", same_bool)
-        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
+        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
         sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
@@ -123,7 +123,7 @@ def main():
         if len(kv_list) != 1:
             print('GET requires 1 key')
             exit(1)
-        pkt2 = pkt / Request(reqType=3, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / ResponseList()
+        pkt2 = pkt / Request(reqType=3, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
         sendp(pkt2, iface=iface, verbose=False)
 
 

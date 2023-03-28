@@ -230,6 +230,7 @@ control MyEgress(inout headers hdr,
        action add_response() {
            hdr.response.push_front(1);
            hdr.response[0].setValid();
+           hdr.response[0].keepGoing = 1;
            kvstore.read(hdr.response[0].ret_val, (bit<32>)((bit<8>) hdr.request.key1 + meta.nextInd.i));
        }
 
