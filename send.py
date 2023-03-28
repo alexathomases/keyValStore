@@ -98,7 +98,6 @@ def main():
 
     # RANGE request
     elif sys.argv[2] == "r":
-        # TODO split if necessary
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
         kv_list = sys.argv[3].split()
@@ -135,11 +134,48 @@ def main():
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
         kv_list = sys.argv[3].split()
-        if len(kv_list) != 1:
-            print('GET requires 1 key')
+        if len(kv_list) != 3:
+            print('SELECT requires k, operand, and value')
             exit(1)
-        pkt2 = pkt / Request(reqType=3, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
-        sendp(pkt2, iface=iface, verbose=False)
+        op = kv_list[1]
+        value = int(kv_list[2])
+
+        if op == ">":
+            k1 = value + 1
+            k2 = 1023
+        elif op == ">=":
+            k1 = value
+            k2 = 1023
+        elif op == "==":
+            k1 = value
+            k2 = value
+        elif op == "<":
+            k2 = value - 1
+            k2 = 0
+        elif op == "<=":
+            k1 = value
+            k2 = 0
+        else:
+            print('Invalid operand for SELECT')
+            exit(1)
+
+        num_responses = k2 - k1 + 1
+        if num_responses <= 60:
+            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            for _ in range(num_responses):
+                pkt2 = pkt2 / Response(same = 1)
+            sendp(pkt2, iface=iface, verbose=False)
+        else:
+            split_k1 = k1
+            for i in range(math.ceil(num_responses/60)):
+                split_k1 = split_k1 + (60 * i)
+                split_k2 = min(k2, split_k1 + (60 * (i + 1)) - 1)
+                # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
+                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                for _ in range(split_k2 - split_k1 + 1):
+                    pkt2 = pkt2 / Response(same = 1)
+                print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
+                sendp(pkt2, iface=iface, verbose=False)
 
 
 if __name__ == '__main__':
