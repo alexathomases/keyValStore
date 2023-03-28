@@ -6,6 +6,11 @@ import math
 
 from scapy.all import *
 
+#constant for determining how many keys can be included in range/select requests
+ttlConst = 64
+maxKeysPerPacket = ttlConst - 2
+
+
 class Request(Packet):
     name = "request"
     fields_desc=[BitField("exists", 0, 8),
@@ -78,7 +83,7 @@ def main():
             print('GET requires 1 key')
             exit(1)
         k = int(sys.argv[3])
-        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -92,7 +97,7 @@ def main():
             exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -111,18 +116,18 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         num_responses = k2 - k1 + 1
-        if num_responses <= 60:
-            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+        if num_responses <= maxKeysPerPacket:
+            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
         else:
             split_k1 = k1
-            for i in range(math.ceil(num_responses/60)):
-                split_k1 = split_k1 + (60 * i)
-                split_k2 = min(k2, split_k1 + (60 * (i + 1)) - 1)
+            for i in range(math.ceil(num_responses/maxKeysPerPacket)):
+                split_k1 = split_k1 + (maxKeysPerPacket * i)
+                split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
@@ -150,7 +155,7 @@ def main():
             k1 = value
             k2 = value
         elif op == "<":
-            k2 = value - 1
+            k1 = value - 1
             k2 = 0
         elif op == "<=":
             k1 = value
@@ -160,18 +165,18 @@ def main():
             exit(1)
 
         num_responses = k2 - k1 + 1
-        if num_responses <= 60:
-            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+        if num_responses <= maxKeysPerPacket:
+            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
         else:
             split_k1 = k1
-            for i in range(math.ceil(num_responses/60)):
-                split_k1 = split_k1 + (60 * i)
-                split_k2 = min(k2, split_k1 + (60 * (i + 1)) - 1)
+            for i in range(math.ceil(num_responses/maxKeysPerPacket)):
+                split_k1 = split_k1 + (maxKeysPerPacket* i)
+                split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
