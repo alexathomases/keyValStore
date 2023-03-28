@@ -2,6 +2,7 @@
 import random
 import socket
 import sys
+import math
 
 from scapy.all import *
 
@@ -111,14 +112,22 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         num_responses = k2 - k1 + 1
-        pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
-        if num_responses <= 256:
+        if num_responses <= 60:
+            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
         else:
-            # # TODO: split!
-            pass
+            split_k1 = k1
+            for i in range(math.ceil(num_responses/60)):
+                split_k1 = split_k1 + (60 * i)
+                split_k2 = min(k2, split_k1 + (60 * (i + 1)) - 1)
+                # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
+                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                for _ in range(split_k2 - split_k1 + 1):
+                    pkt2 = pkt2 / Response(same = 1)
+                print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
+                sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
     elif sys.argv[2] == "s":
@@ -129,7 +138,7 @@ def main():
         if len(kv_list) != 1:
             print('GET requires 1 key')
             exit(1)
-        pkt2 = pkt / Request(reqType=3, current=1) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
+        pkt2 = pkt / Request(reqType=3, current=0) / IP(dst=addr) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response(same = 1)
         sendp(pkt2, iface=iface, verbose=False)
 
 
