@@ -16,7 +16,7 @@
       },
       "action_name": "MyIngress.get",
       "action_params": {
-        "port": 1
+        "port": 2
       }
     },
     {
@@ -26,7 +26,7 @@
       },
       "action_name": "MyIngress.put",
       "action_params": {
-        "port": 1
+        "port": 2
       }
     },
     {
@@ -36,7 +36,7 @@
       },
       "action_name": "MyIngress.rangeReq",
       "action_params": {
-        "port": 1
+        "port": 2
       }
     },
     {
@@ -46,7 +46,24 @@
       },
       "action_name": "MyIngress.selectReq",
       "action_params": {
-        "port": 1
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.request.small_key": 1
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "dstAddr": "08:00:00:00:01:00",
+        "port": 2
       }
     }
   ]

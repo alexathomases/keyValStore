@@ -1,8 +1,54 @@
 {
   "target": "bmv2",
-  "p4info": "build/hw2.p4.p4info.txt",
-  "bmv2_json": "build/hw2.json",
+  "p4info": "build/kvstore.p4.p4info.txt",
+  "bmv2_json": "build/kvstore.json",
   "table_entries": [
+    {
+      "table": "MyIngress.kvs",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 0
+      },
+      "action_name": "MyIngress.get",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 1
+      },
+      "action_name": "MyIngress.put",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 2
+      },
+      "action_name": "MyIngress.rangeReq",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 3
+      },
+      "action_name": "MyIngress.selectReq",
+      "action_params": {
+        "port": 2
+      }
+    },
     {
       "table": "MyIngress.ipv4_lpm",
       "default_action": true,
@@ -12,22 +58,11 @@
     {
       "table": "MyIngress.ipv4_lpm",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
+        "hdr.request.small_key": 0
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
-        "dstAddr": "08:00:00:00:04:00",
-        "port": 2
-      }
-    },
-    {
-      "table": "MyIngress.probe",
-      "match": {
-        "hdr.ethernet.etherType": 2050
-      },
-      "action_name": "MyIngress.forward_probe",
-      "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
+        "dstAddr": "08:00:00:00:01:00",
         "port": 2
       }
     }
