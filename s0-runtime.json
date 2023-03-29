@@ -1,7 +1,7 @@
 {
   "target": "bmv2",
-  "p4info": "build/hw2.p4.p4info.txt",
-  "bmv2_json": "build/hw2.json",
+  "p4info": "build/kvstore.p4.p4info.txt",
+  "bmv2_json": "build/kvstore.json",
   "table_entries": [
     {
       "table": "MyIngress.kvs",
@@ -13,88 +13,36 @@
       "table": "MyIngress.kvs",
       "match": {
         "hdr.request.reqType": 0,
-        "hdr.request.small_key": 1
       },
-      "action_name": "MyIngress.get",
+      "action_name": "MyIngress.noAction",
       "action_params": {
-        "port": 2
-      }
-    },
-    {
-      "table": "MyIngress.kvs",
-      "match": {
-        "hdr.request.reqType": 0,
-        "hdr.request.small_key": 0
-      },
-      "action_name": "MyIngress.get",
-      "action_params": {
-        "port": 3
       }
     },
     {
       "table": "MyIngress.kvs",
       "match": {
         "hdr.request.reqType": 1,
-        "hdr.request.small_key": 1
       },
-      "action_name": "MyIngress.put",
+      "action_name": "MyIngress.noAction",
       "action_params": {
-        "port": 2
-      }
-    },
-    {
-      "table": "MyIngress.kvs",
-      "match": {
-        "hdr.request.reqType": 1,
-        "hdr.request.small_key": 0
-      },
-      "action_name": "MyIngress.put",
-      "action_params": {
-        "port": 3
       }
     },
     {
       "table": "MyIngress.kvs",
       "match": {
         "hdr.request.reqType": 2,
-        "hdr.request.small_key": 1
       },
-      "action_name": "MyIngress.rangeReq",
+      "action_name": "MyIngress.noAction",
       "action_params": {
-        "port": 2
-      }
-    },
-    {
-      "table": "MyIngress.kvs",
-      "match": {
-        "hdr.request.reqType": 2,
-        "hdr.request.small_key": 0
-      },
-      "action_name": "MyIngress.rangeReq",
-      "action_params": {
-        "port": 3
-      }
-    },
-    {
-      "table": "MyIngress.kvs",
-      "match": {
-        "hdr.request.reqType": 3,
-        "hdr.request.small_key": 1
-      },
-      "action_name": "MyIngress.selectReq",
-      "action_params": {
-        "port": 2
       }
     },
     {
       "table": "MyIngress.kvs",
       "match": {
         "hdr.request.reqType": 3
-        "hdr.request.small_key": 0
       },
-      "action_name": "MyIngress.selectReq",
+      "action_name": "MyIngress.noAction",
       "action_params": {
-        "port": 3
       }
     },
     {

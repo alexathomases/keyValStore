@@ -19,7 +19,8 @@ class Request(Packet):
                  IntField("key2", 0),
                  IntField("val", 0),
                  BitField("op", 0, 8),
-                 BitField("current", 1, 8)]
+                 BitField("current", 1, 8),
+                 BitField("small_key", 0, 8)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
@@ -83,7 +84,11 @@ def main():
             print('GET requires 1 key')
             exit(1)
         k = int(sys.argv[3])
-        pkt2 = pkt / Request(reqType=0, key1=k, current=1) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        if k < 512:
+            small = 1
+        else:
+            small = 0
+        pkt2 = pkt / Request(reqType=0, key1=k, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -97,7 +102,11 @@ def main():
             exit(1)
         k1 = int(kv_list[0])
         v = int(kv_list[1])
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        if k1 < 512:
+            small = 1
+        else:
+            small = 0
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
@@ -116,8 +125,12 @@ def main():
             exit(1)
         same_bool = (k1 != k2)
         num_responses = k2 - k1 + 1
+        if k2 < 512:
+            small = 1
+        else:
+            small = 0
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
@@ -127,7 +140,7 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket * i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
@@ -149,25 +162,33 @@ def main():
         if op == ">":
             k1 = value + 1
             k2 = 1023
+            small = 0
         elif op == ">=":
             k1 = value
             k2 = 1023
+            small = 0
         elif op == "==":
             k1 = value
             k2 = value
+            if k1 < 512:
+                small = 1
+            else:
+                small = 0
         elif op == "<":
             k1 = 0
             k2 = value - 1
+            small = 1
         elif op == "<=":
             k1 = 0
             k2 = value
+            small = 1
         else:
             print('Invalid operand for SELECT')
             exit(1)
 
         num_responses = k2 - k1 + 1
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             pkt2.show2()
@@ -178,7 +199,7 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket* i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))

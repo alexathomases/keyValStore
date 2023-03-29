@@ -163,6 +163,10 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
 
+    action noAction() {
+      ;
+    }
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -198,7 +202,6 @@ control MyIngress(inout headers hdr,
     table kvs {
         key = {
             hdr.request.reqType: exact;
-            hdr.request.small_key: exact;
         }
         actions = {
             get;
@@ -228,6 +231,7 @@ control MyIngress(inout headers hdr,
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
             kvs.apply();
+            ipv4_lpm.apply();
         }
 
     }
