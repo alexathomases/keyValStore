@@ -67,6 +67,8 @@ header request_t {
     bit<8> op;
     bit<8> current;
     bit<8> small_key;
+    bit<8> ping;
+    // Normal requests are ping 0, ping 1, pong 2
 }
 
 header response_t {
@@ -125,6 +127,11 @@ parser MyParser(packet_in packet,
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition parse_tcp;
+    }
+
+    state parse_ping {
+        packet.extract(hdr.ping);
+        transition parse_ipv4;
     }
 
     state parse_tcp {
@@ -229,10 +236,13 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-            kvs.apply();
-            ipv4_lpm.apply();
+        if (!hdr.ping.isValid()) {
+            if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
+                kvs.apply();
+                ipv4_lpm.apply();
+            }
         }
+
 
     }
 }
