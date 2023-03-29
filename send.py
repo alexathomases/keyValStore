@@ -135,6 +135,7 @@ def main():
 
     # SELECT request
     elif sys.argv[2] == "s":
+        # USAGE: ./send.py 10.0.1.1 s "k < 9"
         # TODO split if necessary, check if same=1
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
@@ -155,11 +156,11 @@ def main():
             k1 = value
             k2 = value
         elif op == "<":
-            k1 = value - 1
-            k2 = 0
+            k1 = 0
+            k2 = value - 1
         elif op == "<=":
-            k1 = value
-            k2 = 0
+            k1 = 0
+            k2 = value
         else:
             print('Invalid operand for SELECT')
             exit(1)
@@ -169,6 +170,7 @@ def main():
             pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
+            pkt2.show2()
             sendp(pkt2, iface=iface, verbose=False)
         else:
             split_k1 = k1

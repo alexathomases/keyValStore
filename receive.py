@@ -53,6 +53,7 @@ def get_if():
 def handle_pkt(pkt):
     print("got a packet")
     if (Response in pkt) and (pkt[IP].ttl < 64):
+        print("response in pkt")
         # pkt.raw()
         # pkt.show2()
         data_layers = [l for l in expand(pkt) if l.name=='response']
