@@ -66,6 +66,7 @@ header request_t {
     bit<32> val;
     bit<8> op;
     bit<8> current;
+    bit<8> small_key;
 }
 
 header response_t {
@@ -192,18 +193,31 @@ control MyIngress(inout headers hdr,
         standard_metadata.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     table kvs {
         key = {
             hdr.request.reqType: exact;
+            hdr.request.small_key: exact;
         }
         actions = {
             get;
             put;
             rangeReq;
             selectReq;
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
+    table ipv4_lpm {
+        key = {
+            hdr.request.small_key;
+        }
+        actions = {
+            ipv4_forward;
             drop;
             NoAction;
         }
