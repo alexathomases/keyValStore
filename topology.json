@@ -5,7 +5,10 @@
                            "arp -i eth0 -s 10.0.1.10 08:00:00:00:01:00"]}
     },
     "switches": {
-        "s1": { "runtime_json" : "s1-runtime.json" }
+        "s0": { "runtime_json" : "s0-runtime.json" },
+        "s1": { "runtime_json" : "s1-runtime.json" },
+        "s2": { "runtime_json" : "s2-runtime.json" },
+        "s3": { "runtime_json" : "s3-runtime.json" }
     },
     "links": [
         ["h1", "s1-p1"]
