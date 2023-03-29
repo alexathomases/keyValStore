@@ -13,7 +13,9 @@ class Request(Packet):
                  IntField("key2", 0),
                  IntField("val", 0),
                  BitField("op", 0, 8),
-                 BitField("current", 1, 8)]
+                 BitField("current", 1, 8),
+                 BitField("small_key", 0, 8),
+                 BitField("ping", 0, 8)]
 
 class Response(Packet):
     name = "response"
