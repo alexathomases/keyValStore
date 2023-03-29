@@ -1,0 +1,146 @@
+
+[2023-03-29 01:37:34.795] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+---
+Message too long (93901 bytes)! Skipping log...
+---
+
+[2023-03-29 01:37:34.811] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: MODIFY
+  entity {
+    table_entry {
+      table_id: 35207968
+      action {
+        action {
+          action_id: 25652968
+        }
+      }
+      is_default_action: true
+    }
+  }
+}
+---
+
+[2023-03-29 01:37:34.814] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35207968
+      match {
+        field_id: 1
+        exact {
+          value: "\000"
+        }
+      }
+      action {
+        action {
+          action_id: 25395738
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-03-29 01:37:34.817] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35207968
+      match {
+        field_id: 1
+        exact {
+          value: "\001"
+        }
+      }
+      action {
+        action {
+          action_id: 32427501
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-03-29 01:37:34.818] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35207968
+      match {
+        field_id: 1
+        exact {
+          value: "\002"
+        }
+      }
+      action {
+        action {
+          action_id: 32995157
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-03-29 01:37:34.819] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35207968
+      match {
+        field_id: 1
+        exact {
+          value: "\003"
+        }
+      }
+      action {
+        action {
+          action_id: 25790744
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+    }
+  }
+}
+---
