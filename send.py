@@ -69,7 +69,7 @@ def main():
 
     print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
-    rand_tag = random.randint(0, 10)
+    rand_tag = random.randint(0, 9)
 
     # GET request
     if sys.argv[2] == "g":

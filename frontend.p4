@@ -198,9 +198,12 @@ control MyIngress(inout headers hdr,
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 ipv4_lpm.apply();
             }
-        } else if (hdr.request.ping == 1) {
-            // TODO clone the packet twice and send the two clones as pings
-            ;
+            if (hdr.request.random == 9) {
+                // TODO clone the packet twice and send the two clones as pings
+                // Make sure to forward original request too
+                // Set hdr.request.ping to 1
+                ;
+            }
         }
 
 
