@@ -69,6 +69,7 @@ def main():
 
     print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
+    rand_tag = random.randint(0, 10)
 
     # GET request
     if sys.argv[2] == "g":
@@ -83,7 +84,7 @@ def main():
             small = 1
         else:
             small = 0
-        pkt2 = pkt / Request(reqType=0, key1=k, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=0, key1=k, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
     # PUT request
@@ -100,7 +101,7 @@ def main():
             small = 1
         else:
             small = 0
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
     # RANGE request
@@ -123,7 +124,7 @@ def main():
         else:
             small = 0
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
@@ -133,7 +134,7 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket * i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
@@ -181,7 +182,7 @@ def main():
 
         num_responses = k2 - k1 + 1
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             pkt2.show2()
@@ -192,7 +193,7 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket* i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
