@@ -1,7 +1,7 @@
 {
   "target": "bmv2",
-  "p4info": "build/kvstore.p4.p4info.txt",
-  "bmv2_json": "build/kvstore.json",
+  "p4info": "build/frontend.p4.p4info.txt",
+  "bmv2_json": "build/frontend.json",
   "table_entries": [
     {
       "table": "MyIngress.kvs",
