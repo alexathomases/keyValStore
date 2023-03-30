@@ -21,7 +21,8 @@ class Request(Packet):
                  BitField("op", 0, 8),
                  BitField("current", 1, 8),
                  BitField("small_key", 0, 8),
-                 BitField("ping", 0, 8)]
+                 BitField("ping", 0, 8),
+                 IntField("rando", 0)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)

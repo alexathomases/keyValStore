@@ -13,8 +13,6 @@ const bit<2> TYPE_PUT = 0b01;
 const bit<2> TYPE_RANGE = 0b10;
 const bit<2> TYPE_SELECT = 0b11;
 
-register<bit<32>>(NUM_KEYS) kvstore;
-
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -69,6 +67,7 @@ header request_t {
     bit<8> small_key;
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
+    bit<32> random;
 }
 
 header response_t {
