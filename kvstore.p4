@@ -195,13 +195,6 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-    }
-
     table kvs {
         key = {
             hdr.request.reqType: exact;
@@ -219,25 +212,10 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
-    table ipv4_lpm {
-        key = {
-            hdr.request.small_key: exact;
-        }
-        actions = {
-            ipv4_forward;
-            drop;
-            NoAction;
-            noAction;
-        }
-        size = 1024;
-        default_action = drop();
-    }
-
     apply {
         if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 kvs.apply();
-                ipv4_lpm.apply();
             }
         }
 

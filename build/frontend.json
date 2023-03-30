@@ -4,7 +4,6 @@
       "name" : "scalars_0",
       "id" : 0,
       "fields" : [
-        ["tmp", 32, false],
         ["metadata._nextInd_i0", 8, false],
         ["metadata._remaining1", 8, false]
       ]
@@ -2227,8 +2226,8 @@
       "name" : "deparser",
       "id" : 0,
       "source_info" : {
-        "filename" : "kvstore.p4",
-        "line" : 279,
+        "filename" : "frontend.p4",
+        "line" : 248,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -2243,7 +2242,7 @@
       "name" : "kvstore",
       "id" : 0,
       "source_info" : {
-        "filename" : "kvstore.p4",
+        "filename" : "frontend.p4",
         "line" : 16,
         "column" : 24,
         "source_fragment" : "kvstore"
@@ -2257,8 +2256,8 @@
       "name" : "calc",
       "id" : 0,
       "source_info" : {
-        "filename" : "kvstore.p4",
-        "line" : 257,
+        "filename" : "frontend.p4",
+        "line" : 226,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -2360,7 +2359,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
+            "filename" : "frontend.p4",
             "line" : 169,
             "column" : 6,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
@@ -2382,7 +2381,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
+            "filename" : "frontend.p4",
             "line" : 173,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
@@ -2391,36 +2390,36 @@
       ]
     },
     {
-      "name" : "MyIngress.get",
+      "name" : "MyIngress.ipv4_forward",
       "id" : 3,
       "runtime_data" : [
         {
+          "name" : "dstAddr",
+          "bitwidth" : 48
+        },
+        {
           "name" : "port",
           "bitwidth" : 9
         }
       ],
       "primitives" : [
         {
-          "op" : "register_read",
+          "op" : "assign",
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["response[0]", "ret_val"]
+              "value" : ["standard_metadata", "egress_spec"]
             },
             {
-              "type" : "register_array",
-              "value" : "kvstore"
-            },
-            {
-              "type" : "field",
-              "value" : ["request", "key1"]
+              "type" : "runtime_data",
+              "value" : 1
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
+            "filename" : "frontend.p4",
             "line" : 177,
             "column" : 8,
-            "source_fragment" : "kvstore.read(hdr.response[0].ret_val, hdr.request.key1)"
+            "source_fragment" : "standard_metadata.egress_spec = port"
           }
         },
         {
@@ -2428,18 +2427,41 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
+              "value" : ["ipv4", "ttl"]
             },
             {
-              "type" : "runtime_data",
-              "value" : 0
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["ipv4", "ttl"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xff"
+                  }
+                }
+              }
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
+            "filename" : "frontend.p4",
             "line" : 178,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = port"
+            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
         },
         {
@@ -2447,76 +2469,18 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["ipv4", "ttl"]
+              "value" : ["ethernet", "srcAddr"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["ipv4", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
+              "type" : "field",
+              "value" : ["ethernet", "dstAddr"]
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
+            "filename" : "frontend.p4",
             "line" : 179,
             "column" : 8,
-            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.put",
-      "id" : 4,
-      "runtime_data" : [
-        {
-          "name" : "port",
-          "bitwidth" : 9
-        }
-      ],
-      "primitives" : [
-        {
-          "op" : "register_write",
-          "parameters" : [
-            {
-              "type" : "register_array",
-              "value" : "kvstore"
-            },
-            {
-              "type" : "field",
-              "value" : ["request", "key1"]
-            },
-            {
-              "type" : "field",
-              "value" : ["request", "val"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 183,
-            "column" : 8,
-            "source_fragment" : "kvstore.write(hdr.request.key1, hdr.request.val)"
+            "source_fragment" : "hdr.ethernet.srcAddr = hdr.ethernet.dstAddr"
           }
         },
         {
@@ -2524,7 +2488,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
+              "value" : ["ethernet", "dstAddr"]
             },
             {
               "type" : "runtime_data",
@@ -2532,375 +2496,10 @@
             }
           ],
           "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 184,
+            "filename" : "frontend.p4",
+            "line" : 180,
             "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = port"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ipv4", "ttl"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["ipv4", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 185,
-            "column" : 8,
-            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.rangeReq",
-      "id" : 5,
-      "runtime_data" : [
-        {
-          "name" : "port",
-          "bitwidth" : 9
-        }
-      ],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "runtime_data",
-              "value" : 0
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 189,
-            "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = port"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ipv4", "ttl"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["ipv4", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 190,
-            "column" : 8,
-            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.selectReq",
-      "id" : 6,
-      "runtime_data" : [
-        {
-          "name" : "port",
-          "bitwidth" : 9
-        }
-      ],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "runtime_data",
-              "value" : 0
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 194,
-            "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = port"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ipv4", "ttl"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["ipv4", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 195,
-            "column" : 8,
-            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyEgress.add_response",
-      "id" : 7,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "push",
-          "parameters" : [
-            {
-              "type" : "header_stack",
-              "value" : "response"
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x1"
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 235,
-            "column" : 11,
-            "source_fragment" : "hdr.response.push_front(1)"
-          }
-        },
-        {
-          "op" : "add_header",
-          "parameters" : [
-            {
-              "type" : "header",
-              "value" : "response[0]"
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 236,
-            "column" : 11,
-            "source_fragment" : "hdr.response[0].setValid()"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["response[0]", "keepGoing"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x01"
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 237,
-            "column" : 11,
-            "source_fragment" : "hdr.response[0].keepGoing = 1"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "&",
-                      "left" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "+",
-                          "left" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "&",
-                              "left" : {
-                                "type" : "expression",
-                                "value" : {
-                                  "op" : "&",
-                                  "left" : {
-                                    "type" : "field",
-                                    "value" : ["request", "key1"]
-                                  },
-                                  "right" : {
-                                    "type" : "hexstr",
-                                    "value" : "0x000000ff"
-                                  }
-                                }
-                              },
-                              "right" : {
-                                "type" : "hexstr",
-                                "value" : "0xff"
-                              }
-                            }
-                          },
-                          "right" : {
-                            "type" : "field",
-                            "value" : ["scalars", "metadata._nextInd_i0"]
-                          }
-                        }
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 238,
-            "column" : 49,
-            "source_fragment" : "(bit<32>)((bit<8>) hdr.request.key1 + meta.nextInd.i)"
-          }
-        },
-        {
-          "op" : "register_read",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["response[0]", "ret_val"]
-            },
-            {
-              "type" : "register_array",
-              "value" : "kvstore"
-            },
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 238,
-            "column" : 11,
-            "source_fragment" : "kvstore.read(hdr.response[0].ret_val, (bit<32>)((bit<8>) hdr.request.key1 + meta.nextInd.i))"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "kvstore245",
-      "id" : 8,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "recirculate",
-          "parameters" : [
-            {
-              "type" : "hexstr",
-              "value" : "0x1"
-            }
-          ],
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 245,
-            "column" : 17,
-            "source_fragment" : "recirculate_preserving_field_list(RECIRC_FL_1)"
+            "source_fragment" : "hdr.ethernet.dstAddr = dstAddr"
           }
         }
       ]
@@ -2911,7 +2510,7 @@
       "name" : "ingress",
       "id" : 0,
       "source_info" : {
-        "filename" : "kvstore.p4",
+        "filename" : "frontend.p4",
         "line" : 163,
         "column" : 8,
         "source_fragment" : "MyIngress"
@@ -2919,19 +2518,19 @@
       "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "MyIngress.kvs",
+          "name" : "MyIngress.ipv4_lpm",
           "id" : 0,
           "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 198,
+            "filename" : "frontend.p4",
+            "line" : 183,
             "column" : 10,
-            "source_fragment" : "kvs"
+            "source_fragment" : "ipv4_lpm"
           },
           "key" : [
             {
               "match_type" : "exact",
-              "name" : "hdr.request.reqType",
-              "target" : ["request", "reqType"],
+              "name" : "hdr.request.small_key",
+              "target" : ["request", "small_key"],
               "mask" : null
             }
           ],
@@ -2941,14 +2540,11 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [3, 4, 5, 6, 2, 0, 1],
-          "actions" : ["MyIngress.get", "MyIngress.put", "MyIngress.rangeReq", "MyIngress.selectReq", "MyIngress.drop", "NoAction", "MyIngress.noAction"],
+          "action_ids" : [3, 2, 0, 1],
+          "actions" : ["MyIngress.ipv4_forward", "MyIngress.drop", "NoAction", "MyIngress.noAction"],
           "base_default_next" : null,
           "next_tables" : {
-            "MyIngress.get" : null,
-            "MyIngress.put" : null,
-            "MyIngress.rangeReq" : null,
-            "MyIngress.selectReq" : null,
+            "MyIngress.ipv4_forward" : null,
             "MyIngress.drop" : null,
             "NoAction" : null,
             "MyIngress.noAction" : null
@@ -2967,8 +2563,8 @@
           "name" : "node_2",
           "id" : 0,
           "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 216,
+            "filename" : "frontend.p4",
+            "line" : 198,
             "column" : 12,
             "source_fragment" : "hdr.request.ping == 0"
           },
@@ -2993,8 +2589,8 @@
           "name" : "node_3",
           "id" : 1,
           "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 217,
+            "filename" : "frontend.p4",
+            "line" : 199,
             "column" : 16,
             "source_fragment" : "hdr.ipv4.isValid() && hdr.ipv4.ttl > 0"
           },
@@ -3030,7 +2626,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "MyIngress.kvs"
+          "true_next" : "MyIngress.ipv4_lpm"
         }
       ]
     },
@@ -3038,204 +2634,15 @@
       "name" : "egress",
       "id" : 1,
       "source_info" : {
-        "filename" : "kvstore.p4",
-        "line" : 230,
+        "filename" : "frontend.p4",
+        "line" : 212,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
-      "init_table" : "node_7",
-      "tables" : [
-        {
-          "name" : "tbl_add_response",
-          "id" : 1,
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 244,
-            "column" : 17,
-            "source_fragment" : "add_response()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [7],
-          "actions" : ["MyEgress.add_response"],
-          "base_default_next" : "tbl_kvstore245",
-          "next_tables" : {
-            "MyEgress.add_response" : "tbl_kvstore245"
-          },
-          "default_entry" : {
-            "action_id" : 7,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_kvstore245",
-          "id" : 2,
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 245,
-            "column" : 17,
-            "source_fragment" : "recirculate_preserving_field_list(RECIRC_FL_1)"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [8],
-          "actions" : ["kvstore245"],
-          "base_default_next" : null,
-          "next_tables" : {
-            "kvstore245" : null
-          },
-          "default_entry" : {
-            "action_id" : 8,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        }
-      ],
+      "init_table" : null,
+      "tables" : [],
       "action_profiles" : [],
-      "conditionals" : [
-        {
-          "name" : "node_7",
-          "id" : 2,
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 242,
-            "column" : 15,
-            "source_fragment" : "meta.nextInd.i <= ((bit<8>) hdr.request.key2 - (bit<8>) hdr.request.key1)"
-          },
-          "expression" : {
-            "type" : "expression",
-            "value" : {
-              "op" : "<=",
-              "left" : {
-                "type" : "field",
-                "value" : ["scalars", "metadata._nextInd_i0"]
-              },
-              "right" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "-",
-                      "left" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "&",
-                          "left" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "&",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["request", "key2"]
-                              },
-                              "right" : {
-                                "type" : "hexstr",
-                                "value" : "0x000000ff"
-                              }
-                            }
-                          },
-                          "right" : {
-                            "type" : "hexstr",
-                            "value" : "0xff"
-                          }
-                        }
-                      },
-                      "right" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "&",
-                          "left" : {
-                            "type" : "expression",
-                            "value" : {
-                              "op" : "&",
-                              "left" : {
-                                "type" : "field",
-                                "value" : ["request", "key1"]
-                              },
-                              "right" : {
-                                "type" : "hexstr",
-                                "value" : "0x000000ff"
-                              }
-                            }
-                          },
-                          "right" : {
-                            "type" : "hexstr",
-                            "value" : "0xff"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          },
-          "false_next" : null,
-          "true_next" : "node_8"
-        },
-        {
-          "name" : "node_8",
-          "id" : 3,
-          "source_info" : {
-            "filename" : "kvstore.p4",
-            "line" : 243,
-            "column" : 17,
-            "source_fragment" : "hdr.ipv4.isValid() && hdr.request.reqType > 1"
-          },
-          "expression" : {
-            "type" : "expression",
-            "value" : {
-              "op" : "and",
-              "left" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "d2b",
-                  "left" : null,
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["ipv4", "$valid$"]
-                  }
-                }
-              },
-              "right" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : ">",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["request", "reqType"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0x01"
-                  }
-                }
-              }
-            }
-          },
-          "false_next" : null,
-          "true_next" : "tbl_add_response"
-        }
-      ]
+      "conditionals" : []
     }
   ],
   "checksums" : [
@@ -3243,8 +2650,8 @@
       "name" : "cksum",
       "id" : 0,
       "source_info" : {
-        "filename" : "kvstore.p4",
-        "line" : 257,
+        "filename" : "frontend.p4",
+        "line" : 226,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -3306,7 +2713,7 @@
       ["standard_metadata", "priority"]
     ]
   ],
-  "program" : "kvstore.p4",
+  "program" : "frontend.p4",
   "__meta__" : {
     "version" : [2, 23],
     "compiler" : "https://github.com/p4lang/p4c"

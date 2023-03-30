@@ -1,12 +1,11 @@
 
-[2023-03-30 02:47:24.125] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-03-30 02:47:24.051] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (104274 bytes)! Skipping log...
+Message too long (104261 bytes)! Skipping log...
 ---
 
-[2023-03-30 02:47:24.142] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.100] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -26,9 +25,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.144] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.103] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -45,11 +43,7 @@ updates {
       }
       action {
         action {
-          action_id: 25395738
-          params {
-            param_id: 1
-            value: "\000\002"
-          }
+          action_id: 25167606
         }
       }
     }
@@ -57,9 +51,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.145] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.104] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -76,11 +69,7 @@ updates {
       }
       action {
         action {
-          action_id: 32427501
-          params {
-            param_id: 1
-            value: "\000\002"
-          }
+          action_id: 25167606
         }
       }
     }
@@ -88,9 +77,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.146] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.106] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -107,11 +95,7 @@ updates {
       }
       action {
         action {
-          action_id: 32995157
-          params {
-            param_id: 1
-            value: "\000\002"
-          }
+          action_id: 25167606
         }
       }
     }
@@ -119,9 +103,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.147] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.108] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -138,11 +121,7 @@ updates {
       }
       action {
         action {
-          action_id: 25790744
-          params {
-            param_id: 1
-            value: "\000\002"
-          }
+          action_id: 25167606
         }
       }
     }
@@ -150,9 +129,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.148] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.109] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -172,9 +150,8 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.149] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.110] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
 election_id {
   low: 1
 }
@@ -199,6 +176,40 @@ updates {
           params {
             param_id: 2
             value: "\000\002"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-03-30 02:47:24.111] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37375156
+      match {
+        field_id: 1
+        exact {
+          value: "\000"
+        }
+      }
+      action {
+        action {
+          action_id: 28792405
+          params {
+            param_id: 1
+            value: "\010\000\000\000\001\000"
+          }
+          params {
+            param_id: 2
+            value: "\000\003"
           }
         }
       }

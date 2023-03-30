@@ -3,27 +3,18 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 35207968
-    name: "MyIngress.kvs"
-    alias: "kvs"
+    id: 37375156
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
   }
   match_fields {
     id: 1
-    name: "hdr.request.reqType"
+    name: "hdr.request.small_key"
     bitwidth: 8
     match_type: EXACT
   }
   action_refs {
-    id: 25395738
-  }
-  action_refs {
-    id: 32427501
-  }
-  action_refs {
-    id: 32995157
-  }
-  action_refs {
-    id: 25790744
+    id: 28792405
   }
   action_refs {
     id: 25652968
@@ -60,57 +51,19 @@ actions {
 }
 actions {
   preamble {
-    id: 25395738
-    name: "MyIngress.get"
-    alias: "get"
+    id: 28792405
+    name: "MyIngress.ipv4_forward"
+    alias: "ipv4_forward"
   }
   params {
     id: 1
-    name: "port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 32427501
-    name: "MyIngress.put"
-    alias: "put"
+    name: "dstAddr"
+    bitwidth: 48
   }
   params {
-    id: 1
+    id: 2
     name: "port"
     bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 32995157
-    name: "MyIngress.rangeReq"
-    alias: "rangeReq"
-  }
-  params {
-    id: 1
-    name: "port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 25790744
-    name: "MyIngress.selectReq"
-    alias: "selectReq"
-  }
-  params {
-    id: 1
-    name: "port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 31383751
-    name: "MyEgress.add_response"
-    alias: "add_response"
   }
 }
 registers {

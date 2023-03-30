@@ -36,6 +36,32 @@ tables {
   }
   size: 1024
 }
+tables {
+  preamble {
+    id: 37375156
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.request.small_key"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28792405
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 25167606
+  }
+  size: 1024
+}
 actions {
   preamble {
     id: 21257015
@@ -102,6 +128,23 @@ actions {
   }
   params {
     id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 28792405
+    name: "MyIngress.ipv4_forward"
+    alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
     name: "port"
     bitwidth: 9
   }

@@ -173,50 +173,11 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
 
-    action get(egressSpec_t port) {
-        kvstore.read(hdr.response[0].ret_val, hdr.request.key1);
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action put(egressSpec_t port) {
-        kvstore.write(hdr.request.key1, hdr.request.val);
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action rangeReq(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action selectReq(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
-    }
-
-    table kvs {
-        key = {
-            hdr.request.reqType: exact;
-        }
-        actions = {
-            get;
-            put;
-            rangeReq;
-            selectReq;
-            drop;
-            NoAction;
-            noAction;
-        }
-        size = 1024;
-        default_action = drop();
     }
 
     table ipv4_lpm {
@@ -236,7 +197,6 @@ control MyIngress(inout headers hdr,
     apply {
         if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-                kvs.apply();
                 ipv4_lpm.apply();
             }
         }

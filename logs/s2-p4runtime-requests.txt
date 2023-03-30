@@ -1,12 +1,12 @@
 
-[2023-03-30 02:47:24.125] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-03-30 02:47:24.162] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
 Message too long (104274 bytes)! Skipping log...
 ---
 
-[2023-03-30 02:47:24.142] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.183] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -26,9 +26,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.144] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.184] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -57,9 +57,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.145] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.186] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -88,9 +88,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.146] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.187] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -119,9 +119,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.147] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.189] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -150,9 +150,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.148] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.190] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -172,9 +172,9 @@ updates {
 }
 ---
 
-[2023-03-30 02:47:24.149] /p4.v1.P4Runtime/Write
+[2023-03-30 02:47:24.193] /p4.v1.P4Runtime/Write
 ---
-device_id: 1
+device_id: 2
 election_id {
   low: 1
 }
@@ -186,7 +186,7 @@ updates {
       match {
         field_id: 1
         exact {
-          value: "\001"
+          value: "\000"
         }
       }
       action {
