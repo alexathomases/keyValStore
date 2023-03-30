@@ -50,13 +50,6 @@ def get_if():
         exit(1)
     return iface
 
-def handle_pkt(pkt):
-    print("got a packet")
-    if Ether in pkt:
-        pkt.show2()
-    #    hexdump(pkt)
-        sys.stdout.flush()
-
 def main():
 
     if len(sys.argv)<4:
@@ -90,7 +83,6 @@ def main():
         else:
             small = 0
         pkt2 = pkt / Request(reqType=0, key1=k, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
-        # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
     # PUT request
@@ -108,7 +100,6 @@ def main():
         else:
             small = 0
         pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1, small_key=small) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
-        # pkt2.show2()
         sendp(pkt2, iface=iface, verbose=False)
 
     # RANGE request

@@ -54,6 +54,7 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
+    pkt.show2()
     if (Response in pkt) and (pkt[IP].ttl < 64):
         print("response in pkt")
         # pkt.raw()
@@ -69,7 +70,7 @@ def handle_pkt(pkt):
 
 
 def main():
-    ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
+    ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth0' in i]
     iface = ifaces[0]
     print("sniffing on %s" % iface)
     sys.stdout.flush()

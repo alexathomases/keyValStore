@@ -129,11 +129,6 @@ parser MyParser(packet_in packet,
         transition parse_tcp;
     }
 
-    state parse_ping {
-        packet.extract(hdr.ping);
-        transition parse_ipv4;
-    }
-
     state parse_tcp {
         packet.extract(hdr.tcp);
           transition select(hdr.tcp.urgentPtr) {
@@ -171,7 +166,7 @@ control MyIngress(inout headers hdr,
 
 
     action noAction() {
-      ;
+      hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action drop() {
@@ -202,6 +197,7 @@ control MyIngress(inout headers hdr,
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
     }
@@ -217,6 +213,7 @@ control MyIngress(inout headers hdr,
             selectReq;
             drop;
             NoAction;
+            noAction;
         }
         size = 1024;
         default_action = drop();
@@ -224,19 +221,20 @@ control MyIngress(inout headers hdr,
 
     table ipv4_lpm {
         key = {
-            hdr.request.small_key;
+            hdr.request.small_key: exact;
         }
         actions = {
             ipv4_forward;
             drop;
             NoAction;
+            noAction;
         }
         size = 1024;
         default_action = drop();
     }
 
     apply {
-        if (!hdr.ping.isValid()) {
+        if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 kvs.apply();
                 ipv4_lpm.apply();

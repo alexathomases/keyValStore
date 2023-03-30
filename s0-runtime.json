@@ -12,7 +12,7 @@
     {
       "table": "MyIngress.kvs",
       "match": {
-        "hdr.request.reqType": 0,
+        "hdr.request.reqType": 0
       },
       "action_name": "MyIngress.noAction",
       "action_params": {
@@ -21,7 +21,7 @@
     {
       "table": "MyIngress.kvs",
       "match": {
-        "hdr.request.reqType": 1,
+        "hdr.request.reqType": 1
       },
       "action_name": "MyIngress.noAction",
       "action_params": {
@@ -30,7 +30,7 @@
     {
       "table": "MyIngress.kvs",
       "match": {
-        "hdr.request.reqType": 2,
+        "hdr.request.reqType": 2
       },
       "action_name": "MyIngress.noAction",
       "action_params": {
