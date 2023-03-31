@@ -4,32 +4,44 @@
   "bmv2_json": "build/backend.json",
   "table_entries": [
     {
-      "table": "MyIngress.ipv4_lpm",
+      "table": "MyIngress.kvs",
       "default_action": true,
       "action_name": "MyIngress.drop",
       "action_params": { }
     },
     {
-      "table": "MyIngress.ipv4_lpm",
+      "table": "MyIngress.kvs",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
+        "hdr.request.reqType": 0
       },
-      "action_name": "MyIngress.ipv4_forward",
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 1
+      },
+      "action_name": "MyIngress.put",
       "action_params": {
-        "dstAddr": "08:00:00:00:01:00",
         "port": 2
       }
     },
     {
-      "table": "MyIngress.probe",
+      "table": "MyIngress.kvs",
       "match": {
-        "hdr.ethernet.etherType": 2050
+        "hdr.request.reqType": 2
       },
-      "action_name": "MyIngress.forward_probe",
-      "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
-        "port": 2
-      }
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.kvs",
+      "match": {
+        "hdr.request.reqType": 3
+      },
+      "action_name": "MyIngress.drop",
+      "action_params": { }
     }
   ]
 }
