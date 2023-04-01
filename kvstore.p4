@@ -165,9 +165,6 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
 
-    action noAction() {
-      hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -206,7 +203,6 @@ control MyIngress(inout headers hdr,
             selectReq;
             drop;
             NoAction;
-            noAction;
         }
         size = 1024;
         default_action = drop();
