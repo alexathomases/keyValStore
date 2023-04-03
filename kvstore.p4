@@ -13,7 +13,7 @@ const bit<2> TYPE_PUT = 0b01;
 const bit<2> TYPE_RANGE = 0b10;
 const bit<2> TYPE_SELECT = 0b11;
 
-register<bit<32>>(NUM_KEYS) kvstore;
+register<bit<32>>(NUM_KEYS, 5000) kvstore;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -166,11 +166,16 @@ control MyIngress(inout headers hdr,
 
 
     action noAction() {
+      kvstore.read(hdr.response[0].ret_val, hdr.request.key1);
+      standard_metadata.egress_spec = 2;
       hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action drop() {
-        mark_to_drop(standard_metadata);
+        //mark_to_drop(standard_metadata);
+        kvstore.read(hdr.response[0].ret_val, hdr.request.key1);
+        standard_metadata.egress_spec = 2;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action get(egressSpec_t port) {
