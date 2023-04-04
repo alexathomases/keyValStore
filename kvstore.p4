@@ -6,6 +6,7 @@
 #define NULL_VAL 5000
 
 const bit<8> RECIRC_FL_1 = 0;
+const bit<8> CLONE_FL_1  = 1;
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_REQ = 0x801;
@@ -70,6 +71,7 @@ header request_t {
     bit<8> small_key;
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
+    bit<32> random;
 }
 
 header response_t {
@@ -80,6 +82,11 @@ header response_t {
 struct recirculate_metadata_t {
    @field_list(RECIRC_FL_1)
    bit<8> i;
+}
+
+struct clone_metadata_t {
+  @field_list(CLONE_FL_1)
+  bit<8> f;
 }
 
 struct metadata {
