@@ -20,7 +20,7 @@ class Request(Packet):
 
 class Response(Packet):
     name = "response"
-    fields_desc=[IntField("ret_val", 0),
+    fields_desc=[IntField("ret_val", 5000),
                  BitField("same", 1, 8)]
     # def extract_padding(self, p):
     #     return "", p
