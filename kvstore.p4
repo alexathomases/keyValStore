@@ -3,7 +3,6 @@
 #include <v1model.p4>
 
 #define NUM_KEYS 1024
-#define NULL_VAL 5000
 
 const bit<8> RECIRC_FL_1 = 0;
 const bit<8> CLONE_FL_1  = 1;
@@ -15,7 +14,7 @@ const bit<2> TYPE_PUT = 0b01;
 const bit<2> TYPE_RANGE = 0b10;
 const bit<2> TYPE_SELECT = 0b11;
 
-register<bit<32>>(NUM_KEYS, NULL_VAL) kvstore;
+register<bit<32>>(NUM_KEYS) kvstore;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
