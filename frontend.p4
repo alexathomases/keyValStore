@@ -5,6 +5,11 @@
 #define NUM_KEYS 1024
 
 const bit<8> RECIRC_FL_1 = 0;
+const bit<8> CLONE_FL_1 = 1;
+
+const bit<32> S3_CLONE_SESSION_ID = 5;
+
+const bit<32> INGRESS_CLONE = 1;
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_REQ = 0x801;
@@ -12,6 +17,9 @@ const bit<2> TYPE_GET = 0b00;
 const bit<2> TYPE_PUT = 0b01;
 const bit<2> TYPE_RANGE = 0b10;
 const bit<2> TYPE_SELECT = 0b11;
+
+#define IS_I2E_CLONE(std_meta) (std_meta.instance_type == INGRESS_CLONE)
+
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -65,6 +73,7 @@ header request_t {
     bit<8> op;
     bit<8> current;
     bit<8> small_key;
+    //small key: 0 = s2, 1 = s1
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
     bit<32> random;
@@ -163,9 +172,24 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
+    action clone_pkt() {
+      clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
+    }
 
     action noAction() {
       hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
+
+    table clone_table {
+      key = {
+          hdr.request.reqType: exact;
+      }
+      actions = {
+          clone_pkt;
+          noAction;
+      }
+      size = 1024;
+      default_action = noAction();
     }
 
     action drop() {
@@ -196,6 +220,7 @@ control MyIngress(inout headers hdr,
     apply {
         if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
+                clone_table.apply();
                 ipv4_lpm.apply();
             }
             if (hdr.request.random == 9) {
@@ -219,6 +244,14 @@ control MyEgress(inout headers hdr,
                  inout standard_metadata_t standard_metadata) {
 
        apply {
+          if (IS_I2E_CLONE(standard_metadata)) {
+              //send out through s0-p4
+              standard_metadata.egress_spec = 4;
+              hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+              hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+              hdr.ethernet.dstAddr = 080000000400;
+
+          }
        }
  }
 

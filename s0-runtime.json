@@ -4,6 +4,20 @@
   "bmv2_json": "build/frontend.json",
   "table_entries": [
     {
+      "table": "MyIngress.clone_table",
+      "default_action": true,
+      "action_name": "MyIngress.noAction",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.clone_table",
+      "match": {
+        "hdr.request.reqType": 1
+      },
+      "action_name": "MyIngress.clone_pkt",
+      "action_params": { }
+    },
+    {
       "table": "MyIngress.ipv4_lpm",
       "default_action": true,
       "action_name": "MyIngress.drop",
