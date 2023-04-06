@@ -55,9 +55,8 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
-    if (Request in pkt):
+    if (Request in pkt and (pkt[IP].ttl < 64)):
         print("Req k1: " + str(pkt[Request].key1) + " val: " + str(pkt[Request].val))
-        #and (pkt[IP].ttl < 64):
         print("response in pkt")
         # pkt.raw()
         # pkt.show2()
