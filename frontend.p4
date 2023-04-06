@@ -246,10 +246,10 @@ control MyEgress(inout headers hdr,
        apply {
           if (IS_I2E_CLONE(standard_metadata)) {
               //send out through s0-p4
-              standard_metadata.egress_spec = 4;
-              hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-              hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-              hdr.ethernet.dstAddr = 080000000400;
+              //standard_metadata.egress_spec = 4;
+              //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+              //hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+              //hdr.ethernet.dstAddr = 080000000400;
 
           }
        }

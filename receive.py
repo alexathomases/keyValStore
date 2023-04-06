@@ -20,7 +20,7 @@ class Request(Packet):
 
 class Response(Packet):
     name = "response"
-    fields_desc=[IntField("ret_val", 5000),
+    fields_desc=[IntField("ret_val", 0),
                  BitField("same", 1, 8)]
     # def extract_padding(self, p):
     #     return "", p
@@ -55,7 +55,8 @@ def get_if():
 
 def handle_pkt(pkt):
     print("got a packet")
-    if (Response in pkt):
+    if (Request in pkt):
+        print("Req k1: " + str(pkt[Request].key1) + " val: " + str(pkt[Request].val))
         #and (pkt[IP].ttl < 64):
         print("response in pkt")
         # pkt.raw()
