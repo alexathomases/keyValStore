@@ -219,6 +219,7 @@ control MyIngress(inout headers hdr,
         if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 kvs.apply();
+                hdr.request.small_key = 2;
             }
         }
 
