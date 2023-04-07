@@ -235,14 +235,10 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        if (hdr.request.ping == 0) {
-            if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-                kvs.apply();
-                ipv4_lpm.apply();
-            }
-        }
-
-
+          if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
+              kvs.apply();
+              ipv4_lpm.apply();
+          }
     }
 }
 

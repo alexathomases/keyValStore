@@ -176,8 +176,18 @@ control MyIngress(inout headers hdr,
       clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
     }
 
+    action clone_to_s1() {
+      standard_metadata.egress_spec = 2;
+      clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
+    }
+
+    action clone_to_s2() {
+      standard_metadata.egress_spec = 3;
+      clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
+    }
+
     action noAction() {
-      hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+      ;
     }
 
     table clone_table {
@@ -224,10 +234,8 @@ control MyIngress(inout headers hdr,
                 ipv4_lpm.apply();
             }
             if (hdr.request.random == 9) {
-                // TODO clone the packet twice and send the two clones as pings
-                // Make sure to forward original request too
-                // Set hdr.request.ping to 1
-                ;
+                clone_to_s1();
+                clone_to_s2();
             }
         }
 
@@ -245,6 +253,7 @@ control MyEgress(inout headers hdr,
 
        apply {
           if (IS_I2E_CLONE(standard_metadata)) {
+              hdr.request.ping = 1;
               //send out through s0-p4
               //standard_metadata.egress_spec = 4;
               //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;

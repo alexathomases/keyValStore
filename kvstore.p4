@@ -221,6 +221,9 @@ control MyIngress(inout headers hdr,
                 kvs.apply();
                 hdr.request.small_key = 2;
             }
+        } else if (hdr.request.ping == 1) {
+            hdr.request.ping = 2;
+            standard_metadata.egress_spec = 1;
         }
 
 
