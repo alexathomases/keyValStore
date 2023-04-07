@@ -237,9 +237,9 @@ control MyIngress(inout headers hdr,
                 clone_to_s1();
                 clone_to_s2();
             }
+        } else if (hdr.request.ping == 2) {
+            // increment num_pongs in header
         }
-
-
     }
 }
 
