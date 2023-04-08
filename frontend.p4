@@ -240,11 +240,11 @@ control MyIngress(inout headers hdr,
                 ipv4_lpm.apply();
             }
             if (hdr.request.random == 9) {
-                clone_to_s1();
-                clone_to_s2();
                 pingpong.read(pings, 0);
                 pings = pings + 2;
                 pingpong.write(0, pings);
+                clone_to_s1();
+                clone_to_s2();
             }
         } else if (hdr.request.ping == 2) {
             pingpong.read(pings, 0);
@@ -252,6 +252,7 @@ control MyIngress(inout headers hdr,
             pongs = pongs + 1;
             pingpong.write(1, pongs);
             hdr.request.pingpong_diff = pings - pongs;
+            standard_metadata.egress_spec = 1;
         }
     }
 }

@@ -57,7 +57,7 @@ def get_if():
 def handle_pkt(pkt):
     print("got a packet")
     if (Request in pkt and (pkt[IP].ttl < 64)):
-        print("Req k1: " + str(pkt[Request].key1) + " val: " + str(pkt[Request].val))
+        #print("Req k1: " + str(pkt[Request].key1) + " val: " + str(pkt[Request].val))
         print("response in pkt")
         # pkt.raw()
         # pkt.show2()
@@ -67,7 +67,7 @@ def handle_pkt(pkt):
             ret_array.insert(0, sw.ret_val)
         for ret in ret_array:
             print("Return Value: {}".format(ret))
-        # TODO check difference between pings and pongs
+        print("Difference between pings/pongs: " + str(pkt[Request].pingpong_diff))
         sys.stdout.flush()
 
 
