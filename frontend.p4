@@ -20,6 +20,8 @@ const bit<2> TYPE_SELECT = 0b11;
 
 #define IS_I2E_CLONE(std_meta) (std_meta.instance_type == INGRESS_CLONE)
 
+register<bit<32>>(2) pingpong;
+
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -77,6 +79,7 @@ header request_t {
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
     bit<32> random;
+    bit<32> pingpong_diff;
 }
 
 header response_t {
@@ -172,6 +175,9 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
+    bit<32> pings;
+    bit<32> pongs;
+
     action clone_pkt() {
       clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
     }
@@ -236,9 +242,16 @@ control MyIngress(inout headers hdr,
             if (hdr.request.random == 9) {
                 clone_to_s1();
                 clone_to_s2();
+                pingpong.read(pings, 0);
+                pings = pings + 2;
+                pingpong.write(0, pings);
             }
         } else if (hdr.request.ping == 2) {
-            // increment num_pongs in header
+            pingpong.read(pings, 0);
+            pingpong.read(pongs, 1);
+            pongs = pongs + 1;
+            pingpong.write(1, pongs);
+            hdr.request.pingpong_diff = pings - pongs;
         }
     }
 }

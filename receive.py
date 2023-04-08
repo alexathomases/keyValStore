@@ -16,7 +16,8 @@ class Request(Packet):
                  BitField("current", 1, 8),
                  BitField("small_key", 0, 8),
                  BitField("ping", 0, 8),
-                 IntField("rando", 0)]
+                 IntField("rando", 0),
+                 IntField("pingpong_diff", 0)]
 
 class Response(Packet):
     name = "response"
@@ -61,12 +62,12 @@ def handle_pkt(pkt):
         # pkt.raw()
         # pkt.show2()
         data_layers = [l for l in expand(pkt) if l.name=='response']
-    #    hexdump(pkt)
         ret_array = []
         for sw in data_layers:
             ret_array.insert(0, sw.ret_val)
         for ret in ret_array:
             print("Return Value: {}".format(ret))
+        # TODO check difference between pings and pongs
         sys.stdout.flush()
 
 
