@@ -8,6 +8,8 @@ const bit<8> RECIRC_FL_1 = 0;
 const bit<8> CLONE_FL_1 = 1;
 
 const bit<32> S3_CLONE_SESSION_ID = 5;
+const bit<32> S1_CLONE_SESSION_ID = 6;
+const bit<32> S2_CLONE_SESSION_ID = 7;
 
 const bit<32> INGRESS_CLONE = 1;
 
@@ -183,13 +185,11 @@ control MyIngress(inout headers hdr,
     }
 
     action clone_to_s1() {
-      standard_metadata.egress_spec = 2;
-      clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
+      clone_preserving_field_list(CloneType.I2E, S1_CLONE_SESSION_ID, CLONE_FL_1);
     }
 
     action clone_to_s2() {
-      standard_metadata.egress_spec = 3;
-      clone_preserving_field_list(CloneType.I2E, S3_CLONE_SESSION_ID, CLONE_FL_1);
+      clone_preserving_field_list(CloneType.I2E, S2_CLONE_SESSION_ID, CLONE_FL_1);
     }
 
     action noAction() {
@@ -207,6 +207,31 @@ control MyIngress(inout headers hdr,
       size = 1024;
       default_action = noAction();
     }
+
+    table clone_ping_s1 {
+      key = {
+          hdr.request.random: exact;
+      }
+      actions = {
+          clone_to_s1;
+          noAction;
+      }
+      size = 1024;
+      default_action = noAction();
+    }
+
+    table clone_ping_s2 {
+      key = {
+          hdr.request.random: exact;
+      }
+      actions = {
+          clone_to_s2;
+          noAction;
+      }
+      size = 1024;
+      default_action = noAction();
+    }
+
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -240,11 +265,12 @@ control MyIngress(inout headers hdr,
                 ipv4_lpm.apply();
             }
             if (hdr.request.random == 9) {
+                hdr.request.ping = 1;
                 pingpong.read(pings, 0);
                 pings = pings + 2;
                 pingpong.write(0, pings);
-                clone_to_s1();
-                clone_to_s2();
+                clone_ping_s1.apply();
+                clone_ping_s2.apply();
             }
         } else if (hdr.request.ping == 2) {
             pingpong.read(pings, 0);
@@ -267,7 +293,6 @@ control MyEgress(inout headers hdr,
 
        apply {
           if (IS_I2E_CLONE(standard_metadata)) {
-              hdr.request.ping = 1;
               //send out through s0-p4
               //standard_metadata.egress_spec = 4;
               //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;

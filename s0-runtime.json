@@ -10,8 +10,24 @@
           "instance": 1
         }
       ]
+    },
+    {
+      "clone_session_id": 6,
+      "replicas": [
+          {"egress_port": 2,
+          "instance": 1
+        }
+      ]
+    },
+    {
+      "clone_session_id": 7,
+      "replicas": [
+          {"egress_port": 3,
+          "instance": 1
+        }
+      ]
     }
-  ],
+],
   "table_entries": [
     {
       "table": "MyIngress.clone_table",
@@ -25,6 +41,34 @@
         "hdr.request.reqType": 1
       },
       "action_name": "MyIngress.clone_pkt",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.clone_ping_s1",
+      "default_action": true,
+      "action_name": "MyIngress.noAction",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.clone_ping_s1",
+      "match": {
+        "hdr.request.random": 9
+      },
+      "action_name": "MyIngress.clone_to_s1",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.clone_ping_s2",
+      "default_action": true,
+      "action_name": "MyIngress.noAction",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.clone_ping_s2",
+      "match": {
+        "hdr.request.random": 9
+      },
+      "action_name": "MyIngress.clone_to_s2",
       "action_params": { }
     },
     {

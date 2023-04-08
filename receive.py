@@ -67,6 +67,7 @@ def handle_pkt(pkt):
             ret_array.insert(0, sw.ret_val)
         for ret in ret_array:
             print("Return Value: {}".format(ret))
+        # if pkt[Request].pingpong_diff > 0:
         print("Difference between pings/pongs: " + str(pkt[Request].pingpong_diff))
         sys.stdout.flush()
 

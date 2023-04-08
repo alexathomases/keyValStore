@@ -67,9 +67,11 @@ header request_t {
     bit<8> op;
     bit<8> current;
     bit<8> small_key;
+    //small key: 0 = s2, 1 = s1
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
     bit<32> random;
+    bit<32> pingpong_diff;
 }
 
 header response_t {
