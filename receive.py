@@ -17,7 +17,7 @@ class Request(Packet):
                  BitField("small_key", 0, 8),
                  BitField("ping", 0, 8),
                  IntField("rando", 0),
-                 IntField("pingpong_diff", 0)]
+                 BitField("pingpong_diff", 0, 32)]
 
 class Response(Packet):
     name = "response"
@@ -57,7 +57,6 @@ def get_if():
 def handle_pkt(pkt):
     print("got a packet")
     if (Request in pkt and (pkt[IP].ttl < 64)):
-        #print("Req k1: " + str(pkt[Request].key1) + " val: " + str(pkt[Request].val))
         print("response in pkt")
         # pkt.raw()
         # pkt.show2()
@@ -67,10 +66,9 @@ def handle_pkt(pkt):
             ret_array.insert(0, sw.ret_val)
         for ret in ret_array:
             print("Return Value: {}".format(ret))
-        # if pkt[Request].pingpong_diff > 0:
-        print("ping value: " + str(pkt[Request].ping))
-        print("small key value: " + str(pkt[Request].small_key))
-        print("Difference between pings/pongs: " + str(pkt[Request].pingpong_diff))
+        if pkt[Request].pingpong_diff > 10 and pkt[Request].ping == 2:
+            print("PING request detected potential switch failure!")
+            print("Difference between pings/pongs: " + str(pkt[Request].pingpong_diff))
         sys.stdout.flush()
 
 

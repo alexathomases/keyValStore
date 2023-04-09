@@ -23,7 +23,7 @@ class Request(Packet):
                  BitField("small_key", 0, 8),
                  BitField("ping", 0, 8),
                  IntField("rando", 0),
-                 IntField("pingpong_diff", 0)]
+                 BitField("pingpong_diff", 0, 32)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)

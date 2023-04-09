@@ -280,7 +280,11 @@ control MyIngress(inout headers hdr,
             pingpong.read(pongs, 1);
             pongs = pongs + 1;
             pingpong.write(1, pongs);
-            hdr.request.pingpong_diff = pings - pongs;
+            if (pings >= pongs) {
+                hdr.request.pingpong_diff = pings - pongs;
+            } else {
+                hdr.request.pingpong_diff = 0;
+            }
             standard_metadata.egress_spec = 1;
         }
     }
