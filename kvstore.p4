@@ -222,8 +222,10 @@ control MyIngress(inout headers hdr,
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 kvs.apply();
                 hdr.request.small_key = 2;
+                hdr.request.random = 0;
             }
         } else if (hdr.request.ping == 1) {
+            hdr.request.small_key = 2;
             hdr.request.ping = 2;
             standard_metadata.egress_spec = 1;
         }

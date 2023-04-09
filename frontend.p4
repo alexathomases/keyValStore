@@ -185,10 +185,12 @@ control MyIngress(inout headers hdr,
     }
 
     action clone_to_s1() {
+      hdr.request.random = 0;
       clone_preserving_field_list(CloneType.I2E, S1_CLONE_SESSION_ID, CLONE_FL_1);
     }
 
     action clone_to_s2() {
+      hdr.request.random = 0;
       clone_preserving_field_list(CloneType.I2E, S2_CLONE_SESSION_ID, CLONE_FL_1);
     }
 
@@ -259,7 +261,7 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        if (hdr.request.ping == 0) {
+        if (hdr.request.ping != 2) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 clone_table.apply();
                 ipv4_lpm.apply();
@@ -272,6 +274,7 @@ control MyIngress(inout headers hdr,
                 clone_ping_s1.apply();
                 clone_ping_s2.apply();
             }
+
         } else if (hdr.request.ping == 2) {
             pingpong.read(pings, 0);
             pingpong.read(pongs, 1);
