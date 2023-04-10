@@ -60,12 +60,13 @@ def handle_pkt(pkt):
         print("response in pkt")
         # pkt.raw()
         # pkt.show2()
-        data_layers = [l for l in expand(pkt) if l.name=='response']
-        ret_array = []
-        for sw in data_layers:
-            ret_array.insert(0, sw.ret_val)
-        for ret in ret_array:
-            print("Return Value: {}".format(ret))
+        if pkt[Request].ping != 2:
+            data_layers = [l for l in expand(pkt) if l.name=='response']
+            ret_array = []
+            for sw in data_layers:
+                ret_array.insert(0, sw.ret_val)
+            for ret in ret_array:
+                print("Return Value: {}".format(ret))
         if pkt[Request].pingpong_diff > 10 and pkt[Request].ping == 2:
             print("PING request detected potential switch failure!")
             print("Difference between pings/pongs: " + str(pkt[Request].pingpong_diff))
