@@ -72,6 +72,7 @@ header request_t {
     // Normal requests are ping 0, ping 1, pong 2
     bit<32> random;
     bit<32> pingpong_diff;
+    bit<8> user;
 }
 
 header response_t {

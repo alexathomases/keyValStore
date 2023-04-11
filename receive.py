@@ -17,7 +17,8 @@ class Request(Packet):
                  BitField("small_key", 0, 8),
                  BitField("ping", 0, 8),
                  IntField("rando", 0),
-                 BitField("pingpong_diff", 0, 32)]
+                 BitField("pingpong_diff", 0, 32),
+                 BitField("user", 0, 8)]
 
 class Response(Packet):
     name = "response"
