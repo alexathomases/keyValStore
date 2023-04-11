@@ -72,6 +72,8 @@ def main():
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
     rand_tag = random.randint(0, 9)
 
+    # Alice
+
     # GET request
     if sys.argv[2] == "g":
         tcp_sport = random.randint(49152,65535)
