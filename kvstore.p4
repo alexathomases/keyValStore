@@ -66,7 +66,7 @@ header request_t {
     bit<32> key2;
     bit<32> val;
     bit<8> op;
-    bit<8> current;
+    bit<32> current;
     bit<8> small_key;
     //small key: 0 = s2, 1 = s1
     bit<8> ping;
@@ -82,17 +82,17 @@ header response_t {
 
 struct recirculate_metadata_t {
    @field_list(RECIRC_FL_1)
-   bit<8> i;
+   bit<32> i;
 }
 
 struct clone_metadata_t {
   @field_list(CLONE_FL_1)
-  bit<8> f;
+  bit<32> f;
 }
 
 struct metadata {
     recirculate_metadata_t nextInd;
-    bit<8> remaining;
+    bit<32> remaining;
 }
 
 struct headers {
@@ -246,11 +246,11 @@ control MyEgress(inout headers hdr,
            hdr.response.push_front(1);
            hdr.response[0].setValid();
            hdr.response[0].keepGoing = 1;
-           kvstore.read(hdr.response[0].ret_val, (bit<32>)((bit<8>) hdr.request.key1 + meta.nextInd.i));
+           kvstore.read(hdr.response[0].ret_val, (bit<32>) hdr.request.key1 + meta.nextInd.i);
        }
 
        apply {
-           if (meta.nextInd.i <= ((bit<8>) hdr.request.key2 - (bit<8>) hdr.request.key1)) {
+           if (meta.nextInd.i <= (hdr.request.key2 - hdr.request.key1)) {
              if (hdr.ipv4.isValid() && hdr.request.reqType > 1) {
                  add_response();
                  recirculate_preserving_field_list(RECIRC_FL_1);

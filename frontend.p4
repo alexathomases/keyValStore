@@ -75,7 +75,7 @@ header request_t {
     bit<32> key2;
     bit<32> val;
     bit<8> op;
-    bit<8> current;
+    bit<32> current;
     bit<8> small_key;
     //small key: 0 = s2, 1 = s1
     bit<8> ping;
@@ -91,12 +91,12 @@ header response_t {
 
 struct recirculate_metadata_t {
    @field_list(RECIRC_FL_1)
-   bit<8> i;
+   bit<32> i;
 }
 
 struct metadata {
     recirculate_metadata_t nextInd;
-    bit<8> remaining;
+    bit<32> remaining;
 }
 
 struct headers {
