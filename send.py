@@ -19,7 +19,7 @@ class Request(Packet):
                  IntField("key2", 0),
                  IntField("val", 0),
                  BitField("op", 0, 8),
-                 BitField("current", 1, 8)]
+                 BitField("current", 1, 32)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)

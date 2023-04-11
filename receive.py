@@ -13,7 +13,7 @@ class Request(Packet):
                  IntField("key2", 0),
                  IntField("val", 0),
                  BitField("op", 0, 8),
-                 BitField("current", 1, 8)]
+                 BitField("current", 1, 32)]
 
 class Response(Packet):
     name = "response"
