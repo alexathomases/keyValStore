@@ -55,8 +55,8 @@ def get_if():
 
 def main():
 
-    if len(sys.argv)<4:
-        print('pass 2 arguments: <destination> <g/p/r/s> "<message>" ')
+    if len(sys.argv)<5:
+        print('pass arguments: <destination> <a/b> <g/p/r/s> "<message>" ')
         exit(1)
 
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
@@ -72,30 +72,29 @@ def main():
     print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
     rand_tag = random.randint(0, 9)
-
-    # Alice
+    user = (sys.argv[2] == 'b')
 
     # GET request
-    if sys.argv[2] == "g":
+    if sys.argv[3] == "g":
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        kv_list = sys.argv[3].split()
+        kv_list = sys.argv[4].split()
         if len(kv_list) != 1:
             print('GET requires 1 key')
             exit(1)
-        k = int(sys.argv[3])
+        k = int(sys.argv[4])
         if k < 512:
             small = 1
         else:
             small = 0
-        pkt2 = pkt / Request(reqType=0, key1=k, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=0, key1=k, user=user, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
     # PUT request
-    elif sys.argv[2] == "p":
+    elif sys.argv[3] == "p":
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        kv_list = sys.argv[3].split()
+        kv_list = sys.argv[4].split()
         if len(kv_list) != 2:
             print('PUT requires 1 key and 1 value')
             exit(1)
@@ -105,14 +104,14 @@ def main():
             small = 1
         else:
             small = 0
-        pkt2 = pkt / Request(reqType=1, key1=k1, val=v, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
+        pkt2 = pkt / Request(reqType=1, key1=k1, user=user, val=v, current=1, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1) / Response()
         sendp(pkt2, iface=iface, verbose=False)
 
     # RANGE request
-    elif sys.argv[2] == "r":
+    elif sys.argv[3] == "r":
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        kv_list = sys.argv[3].split()
+        kv_list = sys.argv[4].split()
         if len(kv_list) != 2:
             print('RANGE requires 2 keys')
             exit(1)
@@ -128,7 +127,7 @@ def main():
         else:
             small = 0
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=2, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=2, user=user, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             sendp(pkt2, iface=iface, verbose=False)
@@ -138,19 +137,19 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket * i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=2, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=2, user=user, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
                 sendp(pkt2, iface=iface, verbose=False)
 
     # SELECT request
-    elif sys.argv[2] == "s":
+    elif sys.argv[3] == "s":
         # USAGE: ./send.py 10.0.1.1 s "k < 9"
         # TODO split if necessary, check if same=1
         tcp_sport = random.randint(49152,65535)
         tcp_dport = random.randint(1000, 2000)
-        kv_list = sys.argv[3].split()
+        kv_list = sys.argv[4].split()
         if len(kv_list) != 3:
             print('SELECT requires k, operand, and value')
             exit(1)
@@ -186,7 +185,7 @@ def main():
 
         num_responses = k2 - k1 + 1
         if num_responses <= maxKeysPerPacket:
-            pkt2 = pkt / Request(reqType=3, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+            pkt2 = pkt / Request(reqType=3, user=user, key1=k1, key2=k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
             for _ in range(num_responses):
                 pkt2 = pkt2 / Response(same = 1)
             pkt2.show2()
@@ -197,7 +196,7 @@ def main():
                 split_k1 = split_k1 + (maxKeysPerPacket* i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
                 # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=3, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=3, user=user, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
