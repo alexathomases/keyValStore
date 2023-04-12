@@ -50,6 +50,22 @@
       "action_params": { }
     },
     {
+      "table": "MyIngress.user_match",
+      "match": {
+        "hdr.request.user": 0
+      },
+      "action_name": "MyIngress.alice",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.user_match",
+      "match": {
+        "hdr.request.user": 1
+      },
+      "action_name": "MyIngress.bob",
+      "action_params": { }
+    },
+    {
       "table": "MyIngress.clone_ping_s1",
       "match": {
         "hdr.request.random": 9

@@ -77,7 +77,7 @@ header request_t {
     bit<8> op;
     bit<32> current;
     bit<8> small_key;
-    //small key: 0 = s2, 1 = s1
+    //small key: 0 = s2, 1 = s1, 2 = invalid
     bit<8> ping;
     // Normal requests are ping 0, ping 1, pong 2
     bit<32> random;
@@ -200,11 +200,15 @@ control MyIngress(inout headers hdr,
     }
 
     action alice() {
-
+        if (hdr.request.reqType == 1 && hdr.request.key1 >= 512) {
+            hdr.request.small_key = 2;
+        }
     }
 
     action bob() {
-
+        if (hdr.request.key1 >= 256 || hdr.request.key2 >= 256) {
+            hdr.request.small_key = 2;
+        }
     }
 
     table clone_table {
@@ -287,6 +291,7 @@ control MyIngress(inout headers hdr,
     apply {
         if (hdr.request.ping != 2) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
+                user_match.apply();
                 clone_table.apply();
                 ipv4_lpm.apply();
             }
