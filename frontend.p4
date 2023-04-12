@@ -199,6 +199,14 @@ control MyIngress(inout headers hdr,
       ;
     }
 
+    action alice() {
+
+    }
+
+    action bob() {
+
+    }
+
     table clone_table {
       key = {
           hdr.request.reqType: exact;
@@ -253,6 +261,21 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             ipv4_forward;
+            drop;
+            NoAction;
+            noAction;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
+    table user_match {
+        key = {
+            hdr.request.user: exact;
+        }
+        actions = {
+            alice;
+            bob;
             drop;
             NoAction;
             noAction;
