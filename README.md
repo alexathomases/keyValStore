@@ -1,4 +1,4 @@
-# Milestone 1: In-Network Key-Value Store
+# Milestone 2: KVS Partitions & Load-Balancing
 
 ## Relevant Files
 
@@ -12,6 +12,20 @@
 
 * send.py:
 * receive.py
+
+## Usage
+
+The following command performs GET(5):
+./send.py 10.0.1.1 g “5”
+
+The following command performs PUT(5, 18):
+./send.py 10.0.1.1 p “5 18”
+
+The following command performs RANGE(3, 9):
+./send.py 10.0.1.1 r “3 9”
+
+The following command performs SELECT(k <= 6):
+./send.py 10.0.1.1 s “k <= 6”
 
 ## Project Report
 
