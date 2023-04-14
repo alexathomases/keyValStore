@@ -1,4 +1,4 @@
-# Milestone 1: In-Network Key-Value Store
+# Milestone 3: Access Control Lists
 
 ## Relevant Files
 
@@ -12,6 +12,23 @@
 
 * send.py:
 * receive.py
+
+## Usage
+
+The following command performs GET(5) for user Alice:
+./send.py 10.0.1.1 a g “5”
+
+The following command performs GET(5) for user Bob:
+./send.py 10.0.1.1 b g “5”
+
+The following command performs PUT(5, 18) for user Alice:
+./send.py 10.0.1.1 a p “5 18”
+
+The following command performs RANGE(3, 9) for user Alice:
+./send.py 10.0.1.1 a r “3 9”
+
+The following command performs SELECT(k <= 6) for user Bob:
+./send.py 10.0.1.1 b s “k <= 6”
 
 ## Project Report
 
