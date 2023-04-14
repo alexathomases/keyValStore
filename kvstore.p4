@@ -219,6 +219,7 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
+        kvstore.write(1000, 4);
         if (hdr.request.ping == 0) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 kvs.apply();
@@ -247,7 +248,7 @@ control MyEgress(inout headers hdr,
            hdr.response.push_front(1);
            hdr.response[0].setValid();
            hdr.response[0].keepGoing = 1;
-           kvstore.read(hdr.response[0].ret_val, (bit<32>) hdr.request.key1 + meta.nextInd.i);
+           kvstore.read(hdr.response[0].ret_val, hdr.request.key1 + meta.nextInd.i);
        }
 
        apply {

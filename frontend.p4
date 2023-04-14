@@ -134,7 +134,6 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.request);
         meta.nextInd.i = hdr.request.current;
         meta.remaining =  hdr.request.current;
-        hdr.request.current = hdr.request.current + 1;
         transition parse_ipv4;
     }
 
@@ -200,13 +199,13 @@ control MyIngress(inout headers hdr,
     }
 
     action alice() {
-        if (hdr.request.reqType == 1 && hdr.request.key1 >= 512) {
+        if (hdr.request.reqType == 1 && hdr.request.key1 > 512) {
             hdr.request.small_key = 2;
         }
     }
 
     action bob() {
-        if (hdr.request.key1 >= 256 || hdr.request.key2 >= 256) {
+        if (hdr.request.key1 > 256 || hdr.request.key2 > 256) {
             hdr.request.small_key = 2;
         }
     }
@@ -292,7 +291,9 @@ control MyIngress(inout headers hdr,
         if (hdr.request.ping != 2) {
             if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
                 user_match.apply();
-                clone_table.apply();
+                if (hdr.request.small_key != 2) {
+                    clone_table.apply();
+                }
                 ipv4_lpm.apply();
             }
             if (hdr.request.random == 9) {
