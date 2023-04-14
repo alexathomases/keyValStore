@@ -133,7 +133,6 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.request);
         meta.nextInd.i = hdr.request.current;
         meta.remaining =  hdr.request.current;
-        hdr.request.current = hdr.request.current + 1;
         transition parse_ipv4;
     }
 

@@ -156,11 +156,17 @@ def main():
 
         if op == ">":
             k1 = value + 1
-            k2 = 1023
+            if k1 < 512:
+                k2 = 511
+            else:
+                k2 = 1023
             small = 0
         elif op == ">=":
             k1 = value
-            k2 = 1023
+            if k1 < 512:
+                k2 = 511
+            else:
+                k2 = 1023
             small = 0
         elif op == "==":
             k1 = value
@@ -170,11 +176,17 @@ def main():
             else:
                 small = 0
         elif op == "<":
-            k1 = 0
+            if (value - 1) < 512:
+                k1 = 0
+            else:
+                k1 = 512
             k2 = value - 1
             small = 1
         elif op == "<=":
-            k1 = 0
+            if value < 512:
+                k1 = 0
+            else:
+                k1 = 512
             k2 = value
             small = 1
         else:
