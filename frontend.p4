@@ -83,6 +83,7 @@ header request_t {
     bit<32> random;
     bit<32> pingpong_diff;
     bit<8> user;
+    bit<32> keyMax;
 }
 
 header response_t {
@@ -199,13 +200,14 @@ control MyIngress(inout headers hdr,
     }
 
     action alice() {
-        if (hdr.request.reqType == 1 && hdr.request.key1 > 512) {
+        if (hdr.request.reqType == 1 && (hdr.request.keyMax > 512 || hdr.request.key1 > 512)) {
             hdr.request.small_key = 2;
         }
     }
 
     action bob() {
-        if (hdr.request.key1 > 256 || hdr.request.key2 > 256) {
+
+        if (hdr.request.keyMax > 256 || hdr.request.key1 > 256 || hdr.request.key2 > 256) {
             hdr.request.small_key = 2;
         }
     }

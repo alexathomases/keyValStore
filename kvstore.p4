@@ -74,6 +74,7 @@ header request_t {
     bit<32> random;
     bit<32> pingpong_diff;
     bit<8> user;
+    bit<32> keyMax;
 }
 
 header response_t {
