@@ -24,7 +24,8 @@ class Request(Packet):
                  BitField("ping", 0, 8),
                  IntField("rando", 0),
                  BitField("pingpong_diff", 0, 32),
-                 BitField("user", 0, 8)]
+                 BitField("user", 0, 8),
+                 IntField("key_max", 0)]
 
 bind_layers(Ether, Request, type = 0x0801)
 bind_layers(Request, IP, exists = 1)
@@ -133,11 +134,11 @@ def main():
             sendp(pkt2, iface=iface, verbose=False)
         else:
             split_k1 = k1
+            max = k2
             for i in range(math.ceil(num_responses/maxKeysPerPacket)):
                 split_k1 = split_k1 + (maxKeysPerPacket * i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
-                # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=2, user=user, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=2, user=user, key_max=max, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
@@ -192,11 +193,11 @@ def main():
             sendp(pkt2, iface=iface, verbose=False)
         else:
             split_k1 = k1
+            max = k2
             for i in range(math.ceil(num_responses/maxKeysPerPacket)):
                 split_k1 = split_k1 + (maxKeysPerPacket* i)
                 split_k2 = min(k2, split_k1 + (maxKeysPerPacket * (i + 1)) - 1)
-                # print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
-                pkt2 = pkt / Request(reqType=3, user=user, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
+                pkt2 = pkt / Request(reqType=3, user=user, key_max = max, key1=split_k1, key2=split_k2, current=0, small_key=small, rando=rand_tag) / IP(dst=addr, ttl = ttlConst) / TCP(dport=tcp_dport, sport=tcp_sport, urgptr=1)
                 for _ in range(split_k2 - split_k1 + 1):
                     pkt2 = pkt2 / Response(same = 1)
                 print("in split, k1: {} and k2: {}".format(split_k1, split_k2))
