@@ -15,7 +15,7 @@
 
 ## Program Design
 
-To implement the in-network key-value store, we designed a topology with one end host and one switch. The client sent and received requests while the switch maintained the internal database. Inside the switch, which runs the program kvstore.p4, we used a register of length 1024 to maintain the data. The register indices corresponded to the keys in the key-value pair and the data in the register corresponded to the values. For instance, the key-value pair (10, 15) would be stored as the integer 15 at index 10 inside the register. We performed the logic for parsing command-line requests inside our Scapy-based Python client scripts. The specific keys and values for each request were stored as custom Request and Response headers inside the packet. In the kvstore.p4 program, we use match/action tables to determine the request type (GET, PUT, RANGE, or SELECT) and perform the appropriate operations. Specifically, the operations involved for each request were reading from or writing to the database register. For RANGE and SELECT requests that queried multiple keys, we used the recirculate_preserving_field_list() functionality to recirculate the packet through the ingress and egress pipelines after dynamically adding a new element to the array of Response headers. 
+To implement the in-network key-value store, we designed a topology with one end host and one switch. The client sent and received requests while the switch maintained the internal database. Inside the switch, which runs the program kvstore.p4, we used a register of length 1024 to maintain the data. The register indices corresponded to the keys in the key-value pair and the data in the register corresponded to the values. For instance, the key-value pair (10, 15) would be stored as the integer 15 at index 10 inside the register. We performed the logic for parsing command-line requests inside our Scapy-based Python client scripts. The specific keys and values for each request were stored as custom Request and Response headers inside the packet. In the kvstore.p4 program, we use match/action tables to determine the request type (GET, PUT, RANGE, or SELECT) and perform the appropriate operations. Specifically, the operations involved for each request were reading from or writing to the database register. For RANGE and SELECT requests that queried multiple keys, we used the recirculate_preserving_field_list() functionality to recirculate the packet through the ingress and egress pipelines after dynamically adding a new element to the array of Response headers.
 
 ## Usage
 
@@ -30,6 +30,43 @@ The following command performs RANGE(3, 9):
 
 The following command performs SELECT(k <= 6):
 ./send.py 10.0.1.1 s “k <= 6”
+
+To test the functionality of GET, PUT, RANGE, SELECT:
+  To test simple put/get:
+    ./send.py 10.0.1.1 p “5 18”
+    ./send.py 10.0.1.1 g "5" => Return Value: 18
+    ./send.py 10.0.1.1 p "600 800"
+    ./send.py 10.0.1.1 g "600" => Return Value: 800
+
+  To test putting returns the latest version:
+    ./send.py 10.0.1.1 p "6 9"
+    ./send.py 10.0.1.1 p "6 10"
+    ./send.py 10.0.1.1 g "6" => Return Value: 10
+
+  To test range:
+    ./send.py 10.0.1.1 p “7 8”
+    ./send.py 10.0.1.1 p “8 10”
+    ./send.py 10.0.1.1 p "10 5"
+    ./send.py 10.0.1.1 r "7 10" =>
+      Return Value: 8, 10, 0, 5
+    ./send.py 10.0.1.1 r "0 20" =>
+      Return Value: 0, 0, 0, 0, 0, 0, 8, 10, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+  To test select:
+    ./send.py 10.0.1.1 p “7 8”
+    ./send.py 10.0.1.1 p “8 10”
+    ./send.py 10.0.1.1 p "10 5"
+    ./send.py 10.0.1.1 s "k <= 10" =>
+      Return Value: 0, 0, 0, 0, 0, 0, 8, 10, 0, 5
+    ./send.py 10.0.1.1 s "k < 10" =>
+      Return Value: 0, 0, 0, 0, 0, 0, 8, 10, 0
+    ./send.py 10.0.1.1 s "k == 7" =>
+      Return Value: 8
+    ./send.py 10.0.1.1 p "1010 11"
+    ./send.py 10.0.1.1 s "k > 1000" =>
+      Return Value: 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0
+
 
 ## Relevant Documentation
 
