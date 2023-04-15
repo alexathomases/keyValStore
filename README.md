@@ -30,25 +30,25 @@ The following command performs SELECT(k <= 6):
 In order to test the functionality of our load balanced kvstore, run the
 following commands:
   To test keys < 512:
-    ./send.py 10.0.1.1 a p “5 18”
-    ./send.py 10.0.1.1 a g "5" => Return Value: 18
-    ./send.py 10.0.1.1 a p “10 11”
-    ./send.py 10.0.1.1 a r "5 10"
+    ./send.py 10.0.1.1 p “5 18”
+    ./send.py 10.0.1.1 g "5" => Return Value: 18
+    ./send.py 10.0.1.1 p “10 11”
+    ./send.py 10.0.1.1 r "5 10"
       Return Values: 18, 0, 0, 0, 11
-    ./send.py 10.0.1.1 a s "k <= 10"
+    ./send.py 10.0.1.1 s "k <= 10"
       Return Values: 0, 0, 0, 0, 0, 18, 0, 0, 0, 11
-    ./send.py 10.0.1.1 a p "200 300"
-    ./send.py 10.0.1.1 a g "200" => Return Value: 300
-    ./send.py 10.0.1.1 a s "k == 200" => Return Value: 300
+    ./send.py 10.0.1.1 p "200 300"
+    ./send.py 10.0.1.1 g "200" => Return Value: 300
+    ./send.py 10.0.1.1 s "k == 200" => Return Value: 300
 
   To test keys 512 - 1023:
-    ./send.py 10.0.1.1 a p 512 10”
-    ./send.py 10.0.1.1 a g "512" => Return Value: 10
-    ./send.py 10.0.1.1 a p “515 18”
-    ./send.py 10.0.1.1 a g "515" => Return Value: 18
-    ./send.py 10.0.1.1 a r "512 516"
+    ./send.py 10.0.1.1 p 512 10”
+    ./send.py 10.0.1.1 g "512" => Return Value: 10
+    ./send.py 10.0.1.1 p “515 18”
+    ./send.py 10.0.1.1 g "515" => Return Value: 18
+    ./send.py 10.0.1.1 r "512 516"
       Return Values: 10, 0, 0, 18, 0
-    ./send.py 10.0.1.1 a s "k <= 520"
+    ./send.py 10.0.1.1 s "k <= 520"
       Return Values: 10, 0, 0, 18, 0, 0, 0, 0, 0
 
   To test ping/pong:
