@@ -2,8 +2,13 @@
 
 ## Relevant Files
 
-* kvstore.p4: manages in-network KVS
+* frontend.p4: performs load-balancing and cloning for Switch 0
+* kvstore.p4: manages in-network KVS for Switches 1 and 2
+* backend.p4: manages standby KVS for Switch 3
+* s0-runtime.json: control-plane file for Switch 0
 * s1-runtime.json: control-plane file for Switch 1
+* s2-runtime.json: control-plane file for Switch 2
+* s3-runtime.json: control-plane file for Switch 3
 * topology.json: configures network topology with one host and one switch
 * send.py: scapy-based client for sending requests
 * receive.py: scapy-based client for receiving responses
